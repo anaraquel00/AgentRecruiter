@@ -10,7 +10,7 @@ import os
 class SuperCareerAgent:
     def __init__(self):
         load_dotenv()
-        self.openai_key = os.getenv("OPENAI_KEY")
+        self.openai_key = os.getenv("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")
         self.linkedin_key = os.getenv("LINKEDIN_KEY")
         
         # Conecta ao banco de vagas (simulado)
