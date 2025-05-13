@@ -82,7 +82,7 @@ class CareerAgent:
     # Cria a interface
 
     def main():
-    agent = SuperCareerAgent()
+       agent = SuperCareerAgent()
     with gr.Blocks() as app:
         gr.Markdown("## 🤖 Mentor de Carreiras em TI")
         gr.ChatInterface(
