@@ -81,19 +81,22 @@ class CareerAgent:
 
     # Cria a interface
 
-    def main():
-       agent = SuperCareerAgent()
+    def create_app():
+    agent = SuperCareerAgent()
+    
     with gr.Blocks() as app:
-        gr.Markdown("## 🤖 Mentor de Carreiras em TI")
+        gr.Markdown("# 🚀 Assistente de Carreiras Tech")
         gr.ChatInterface(
-            agent.enhanced_respond,
+            fn=agent.enhanced_respond,
             examples=[
                 "Como criar um currículo para DevOps?",
-                "Quais habilidades aprender para Data Science?",
-                "Mostre vagas para Python remoto"
+                "Quais habilidades aprender para Data Science?"
             ]
         )
-    return app
+    
+    return app  # Dentro da função create_app()
 
+# Ponto de entrada do programa
 if __name__ == "__main__":
-    create_app().launch()
+    app = create_app()
+    app.launch()
