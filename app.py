@@ -21,10 +21,10 @@ class CareerAgent:
         elif "habilidades" in msg or "skills" in msg:
             return self.list_tech_skills()
         else:
-            return """🤖 Olá! Sou seu Assistente de Carreiras em Tech. Pergunte sobre:
-- "Gerar currículo tech"
-- "Criar plano de carreira"
-- "Quais habilidades aprender?"
+            return """🤖 Olá! Sou seu Assistente de Carreiras em Tecnologia. Pergunte sobre:
+- "Criação de currículo em tecnologia"
+- "Criar um plano de carreira"
+- "Quais habilidades você quer aprender?"
 """
 
     def generate_tech_resume(self):
@@ -34,9 +34,9 @@ class CareerAgent:
         **Localização:** [Cidade/Remoto]  
         
         ## 🛠️ Tech Stack  
-        - **Frontend:** React, TypeScript  
-        - **Backend:** Python, Node.js  
-        - **DevOps:** Docker, AWS  
+        - **Frontend:** Angular, React, TypeScript  
+        - **Backend:** Python, Java, Node.js  
+        - **DevOps:** Docker, AWS, AZURE  
         
         ## 💼 Experiência  
         **Engenheiro de Software @ EmpresaX** (2022-Presente)  
