@@ -77,18 +77,18 @@ class CareerAgent:
         return "💻 Habilidades Tech por Área:\n" + skills_list
 
 # Cria a interface
+
 demo = gr.ChatInterface(
-    fn=agent.respond,
+    agent.enhanced_respond,
     additional_inputs=[
-        gr.Textbox("Você é um especialista em carreiras tech.", label="Contexto"),
-        gr.Slider(100, 1000, value=400, label="Tamanho da Resposta")
+        gr.Dropdown(["GPT-4", "GPT-3.5"], label="Modelo"),
+        gr.Slider(100, 2000, value=500, label="Tokens máximos")
     ],
-    title="🚀 Mentor de Carreiras Tech Turbinado",
-    examples=[
-        ["Como criar um currículo para backend?"],
-        ["Mostre salários para DevOps sênior"],
-        ["Analise meu perfil do LinkedIn"]
-    ]
+    title="🤖 CareerGPT Pro",
+    description="""Assistente de carreiras com:
+    - Busca em vagas reais
+    - Análise de perfil com IA
+    - Recomendações personalizadas"""
 )
 
 if __name__ == "__main__":
