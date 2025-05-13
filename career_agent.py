@@ -10,9 +10,9 @@ import os
 class SuperCareerAgent:
     def __init__(self):
         load_dotenv()
-        self.openai_key = os.getenv("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")
-        self.linkedin_key = os.getenv("AQXq5DBSMXcryZblGufHJINkBy3-DpeQ9INeSitxTqcXMedEDw0KPrzNf3_O80yMBst687IRAONuiYN_bb8AlWmaicAkjmI7PNWfSCLUThEa_Gitl7K-lsuzw0UW8fUet02VsznxwJna9sxxjKGb2RygN2zrzYgr3NV3qoxXsz4IQQ1dCqkC-9S2pkXYz8ltNEdLFuaBnF1mJIIplyxgJTvzrmK-m3_QucWoyqTeNUalgX6Q0y4m9GcMy0Lg_bHmKlZKW49nbpbkXv-dFBrJJdYjMCV2Yo2QjwJcFDiQX-xnePwWHoNvTRTfUeQnNS4yB9VLFaAW1s2xYGe3AUsjKNmceOaycw
-")
+        self.openai_key = os.getenv(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)
+        self.linkedin_key = os.getenv(AQXq5DBSMXcryZblGufHJINkBy3-DpeQ9INeSitxTqcXMedEDw0KPrzNf3_O80yMBst687IRAONuiYN_bb8AlWmaicAkjmI7PNWfSCLUThEa_Gitl7K-lsuzw0UW8fUet02VsznxwJna9sxxjKGb2RygN2zrzYgr3NV3qoxXsz4IQQ1dCqkC-9S2pkXYz8ltNEdLFuaBnF1mJIIplyxgJTvzrmK-m3_QucWoyqTeNUalgX6Q0y4m9GcMy0Lg_bHmKlZKW49nbpbkXv-dFBrJJdYjMCV2Yo2QjwJcFDiQX-xnePwWHoNvTRTfUeQnNS4yB9VLFaAW1s2xYGe3AUsjKNmceOaycw
+)
         
         # Conecta ao banco de vagas (simulado)
         self.conn = sqlite3.connect("database/jobs.db")
