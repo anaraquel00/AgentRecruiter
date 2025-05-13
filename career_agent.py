@@ -1,21 +1,91 @@
 import gradio as gr
 import random
 from datetime import datetime
+import openai
+import sqlite3
+import requests
+from dotenv import load_dotenv
+import os
 
 class SuperCareerAgent:
     def __init__(self):
-        self.tech_stacks = {
-            "Frontend": {"skills": ["React", "TypeScript", "Next.js"], "salario": "R$ 4k-15k"},
-            "Backend": {"skills": ["Python", "Node.js", "Go"], "salario": "R$ 5k-18k"},
-            "Data Science": {"skills": ["Python", "SQL", "TensorFlow"], "salario": "R$ 6k-20k"},
-            "DevOps": {"skills": ["Docker", "Kubernetes", "AWS"], "salario": "R$ 7k-22k"}
-        }
+        load_dotenv()
+        self.openai_key = os.getenv("OPENAI_KEY")
+        self.linkedin_key = os.getenv("LINKEDIN_KEY")
         
-        self.salary_data = {
-            "Júnior": {"min": 4000, "max": 6500},
-            "Pleno": {"min": 7000, "max": 12000},
-            "Sênior": {"min": 12000, "max": 25000}
+        # Conecta ao banco de vagas (simulado)
+        self.conn = sqlite3.connect("database/jobs.db")
+        self._create_jobs_table()
+        
+        # Novos atributos
+        self.job_boards = {
+            "LinkedIn": "https://api.linkedin.com/v3/jobs",
+            "Indeed": "https://api.indeed.com/ads/apisearch"
         }
+        def _create_jobs_table(self):
+        cursor = self.conn.cursor()
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS vagas (
+            id INTEGER PRIMARY KEY,
+            titulo TEXT,
+            empresa TEXT,
+            stack TEXT,
+            salario TEXT,
+            link TEXT
+        )
+        """)
+        self.conn.commit()
+
+         def _query_gpt4(self, prompt):
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[{"role": "system", "content": prompt}],
+            api_key=self.openai_key
+        )
+        return response.choices[0].message.content
+
+    def get_real_jobs(self, stack: str):
+        """Busca vagas reais de APIs (simulado)"""
+        # Exemplo com dados mockados - na prática, use APIs reais com autenticação
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT * FROM vagas WHERE stack LIKE ?", (f"%{stack}%",))
+        return cursor.fetchall()
+
+    def enhanced_respond(self, message, history):
+        # Novo: Usa GPT-4 para entender intenções complexas
+        gpt_prompt = f"""
+        Analise esta mensagem e classifique a intenção:
+        "{message}"
+
+        Opções: 
+        - CURRICULO
+        - PLANO_CARREIRA 
+        - CARTA
+        - LINKEDIN
+        - SALARIO
+        - VAGAS
+        - OUTROS
+
+        Retorne apenas o tipo em MAIÚSCULAS.
+        """
+        intent = self._query_gpt4(gpt_prompt).strip()
+
+        if intent == "VAGAS":
+            stack = self._query_gpt4(f"Extraia a stack tech desta mensagem: '{message}'")
+            jobs = self.get_real_jobs(stack)
+            return self._format_jobs(jobs)
+        elif intent == "PLANO_CARREIRA":
+            # ... (outras lógicas existentes)
+        # ... (demais casos)
+
+    def _format_jobs(self, jobs):
+        return "\n".join(
+            f"🏢 **{job[1]}** @ {job[2]}\n"
+            f"🛠️ {job[3]}\n"
+            f"💵 {job[4]}\n"
+            f"🔗 {job[5]}\n"
+            for job in jobs
+        )
 
     def respond(self, message, history, system_message, max_tokens, temperature):
         msg = message.lower()
