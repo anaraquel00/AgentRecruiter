@@ -81,18 +81,20 @@ class CareerAgent:
 
 # Cria a interface
 
-demo = gr.ChatInterface(
-    agent.enhanced_respond,
-    additional_inputs=[
-        gr.Dropdown(["GPT-4", "GPT-3.5"], label="Modelo"),
-        gr.Slider(100, 2000, value=500, label="Tokens máximos")
-    ],
-    title="🤖 CareerGPT Pro",
-    description="""Assistente de carreiras com:
-    - Busca em vagas reais
-    - Análise de perfil com IA
-    - Recomendações personalizadas"""
-)
+    def main():
+    agent = SuperCareerAgent()
+    
+    with gr.Blocks() as demo:
+        gr.Markdown("# 🚀 Assistente de Carreiras Tech")
+        chatbot = gr.ChatInterface(
+            agent.enhanced_respond,
+            additional_inputs=[
+                gr.Textbox("Você é um especialista em carreiras tech", label="Contexto")
+            ]
+        )
+    
+    return demo
 
-if __name__ == "__main__":
+    if __name__ == "__main__":
+    demo = main()
     demo.launch()
