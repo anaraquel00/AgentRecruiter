@@ -2,6 +2,10 @@ from career_agent import SuperCareerAgent
 import gradio as gr
 from datetime import datetime
 
+from dotenv import load_dotenv
+load_dotenv()  # Carrega antes de importar outras classes
+from career_agent import SuperCareerAgent
+
 agent = SuperCareerAgent()
 
 class CareerAgent:
