@@ -81,11 +81,12 @@ class CareerAgent:
 
     # Cria a interface
 
-    def create_app():
-    agent = SuperCareerAgent()
+    def create_app():  # Linha 84 - início da definição da função
+    # Tudo dentro da função DEVE estar indentado (4 espaços)
+    agent = SuperCareerAgent()  # Linha 85 - agora corretamente indentada
     
     with gr.Blocks() as app:
-        gr.Markdown("# 🚀 Assistente de Carreiras Tech")
+        gr.Markdown("# 🤖 Mentor de Carreiras Tech")
         gr.ChatInterface(
             fn=agent.enhanced_respond,
             examples=[
@@ -94,9 +95,9 @@ class CareerAgent:
             ]
         )
     
-    return app  # Dentro da função create_app()
+    return app  # Continua indentado dentro da função
 
-# Ponto de entrada do programa
+# Fora da função - sem indentação
 if __name__ == "__main__":
     app = create_app()
     app.launch()
