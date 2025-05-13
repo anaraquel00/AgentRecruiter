@@ -17,12 +17,24 @@ class SuperCareerAgent:
         self.conn = sqlite3.connect("database/jobs.db")
         self._create_jobs_table()
         
-        # Novos atributos
+        # Definindo atributos faltantes
+        self.tech_stacks = {
+            "Frontend": {"skills": ["React", "TypeScript", "Next.js"], "salario": "R$ 4k-15k"},
+            "Backend": {"skills": ["Python", "Node.js", "Go"], "salario": "R$ 5k-18k"},
+            "Data Science": {"skills": ["Python", "SQL", "TensorFlow"], "salario": "R$ 6k-20k"},
+            "DevOps": {"skills": ["Docker", "Kubernetes", "AWS"], "salario": "R$ 7k-22k"}
+        }
+        
+        self.salary_data = {
+            "Júnior": {"min": 4000, "max": 6500},
+            "Pleno": {"min": 7000, "max": 12000},
+            "Sênior": {"min": 12000, "max": 25000}
+        }
+
         self.job_boards = {
             "LinkedIn": "https://api.linkedin.com/v3/jobs",
             "Indeed": "https://api.indeed.com/ads/apisearch"
         }
-        
         
     def _create_jobs_table(self):
         cursor = self.conn.cursor()
@@ -48,46 +60,40 @@ class SuperCareerAgent:
 
     def get_real_jobs(self, stack: str):
         """Busca vagas reais de APIs (simulado)"""
-        # Exemplo com dados mockados - na prática, use APIs reais com autenticação
         cursor = self.conn.cursor()
         cursor.execute("SELECT * FROM vagas WHERE stack LIKE ?", (f"%{stack}%",))
         return cursor.fetchall()
 
     def enhanced_respond(self, message, history):
-    # Corpo da função DEVE estar indentado (4 espaços)
-    gpt_prompt = f"""
-    Analise esta mensagem e classifique a intenção:
-    "{message}"
+        gpt_prompt = f"""
+        Analise esta mensagem e classifique a intenção:
+        "{message}"
 
-    Opções: 
-    - CURRICULO
-    - PLANO_CARREIRA 
-    - CARTA
-    - LINKEDIN
-    - SALARIO
-    - VAGAS
-    - OUTROS
+        Opções: 
+        - CURRICULO
+        - PLANO_CARREIRA 
+        - CARTA
+        - LINKEDIN
+        - SALARIO
+        - VAGAS
+        - OUTROS
 
-    Retorne apenas o tipo em MAIÚSCULAS.
-    """
-    intent = self._query_gpt4(gpt_prompt).strip()
+        Retorne apenas o tipo em MAIÚSCULAS.
+        """
+        intent = self._query_gpt4(gpt_prompt).strip()
 
-    if intent == "VAGAS":
-        stack = self._query_gpt4(f"Extraia a stack tech desta mensagem: '{message}'")
-        jobs = self.get_real_jobs(stack)
-        return self._format_jobs(jobs)
-    
-    elif intent == "PLANO_CARREIRA":
-        return self._generate_career_plan(message)
-    
-    elif intent == "CURRICULO":
-        return self._generate_tech_resume()
-    
-    elif intent == "CARTA":
-        return self._generate_cover_letter(message)
-    
-    else:
-        return "Como posso ajudar com sua carreira tech? (currículo, plano, vagas)"
+        if intent == "VAGAS":
+            stack = self._query_gpt4(f"Extraia a stack tech desta mensagem: '{message}'")
+            jobs = self.get_real_jobs(stack)
+            return self._format_jobs(jobs)
+        elif intent == "PLANO_CARREIRA":
+            return self.generate_career_roadmap(message)
+        elif intent == "CURRICULO":
+            return self.generate_custom_resume(message)
+        elif intent == "CARTA":
+            return self.generate_cover_letter(message)
+        else:
+            return "Como posso ajudar com sua carreira tech? (currículo, plano, vagas)"
     
     def _format_jobs(self, jobs):
         return "\n".join(
@@ -95,7 +101,7 @@ class SuperCareerAgent:
             f"🛠️ {job[3]}\n"
             f"💵 {job[4]}\n"
             f"🔗 {job[5]}\n"
-        for job in jobs
+            for job in jobs
         )
 
     def respond(self, message, history, system_message, max_tokens, temperature):
@@ -243,7 +249,7 @@ Sênior: R$ {self.salary_data['Sênior']['min']/1000}k-{self.salary_data['Sênio
 agent = SuperCareerAgent()
 
 demo = gr.ChatInterface(
-    agent.respond,
+    agent.enhanced_respond,  # Mudei para usar enhanced_respond
     additional_inputs=[
         gr.Textbox("Você é um especialista em carreiras de tecnologia.", label="Contexto"),
         gr.Slider(100, 1000, value=400, label="Tamanho Máximo da Resposta")
