@@ -22,7 +22,8 @@ class SuperCareerAgent:
             "LinkedIn": "https://api.linkedin.com/v3/jobs",
             "Indeed": "https://api.indeed.com/ads/apisearch"
         }
-        def _create_jobs_table(self):
+        
+     def _create_jobs_table(self):
         cursor = self.conn.cursor()
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS vagas (
