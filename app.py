@@ -1,5 +1,8 @@
+from career_agent import SuperCareerAgent
 import gradio as gr
 from datetime import datetime
+
+agent = SuperCareerAgent()
 
 class CareerAgent:
     def __init__(self):
@@ -74,18 +77,18 @@ class CareerAgent:
         return "💻 Habilidades Tech por Área:\n" + skills_list
 
 # Cria a interface
-agent = CareerAgent()
-
 demo = gr.ChatInterface(
-    agent.generate_response,
+    fn=agent.respond,
     additional_inputs=[
-        gr.Textbox("Você é um assistente de carreiras em tecnologia.", label="System Prompt"),
-        gr.Slider(50, 1000, value=300, label="Max Tokens"),
-        gr.Slider(0.1, 1.0, value=0.7, step=0.1, label="Temperature"),
-        gr.Slider(0.1, 1.0, value=0.9, step=0.05, label="Top-p")
+        gr.Textbox("Você é um especialista em carreiras tech.", label="Contexto"),
+        gr.Slider(100, 1000, value=400, label="Tamanho da Resposta")
     ],
-    title="🤖 Tech Career Bot",
-    description="Gerador de currículos e planos de carreira para tecnologia"
+    title="🚀 Mentor de Carreiras Tech Turbinado",
+    examples=[
+        ["Como criar um currículo para backend?"],
+        ["Mostre salários para DevOps sênior"],
+        ["Analise meu perfil do LinkedIn"]
+    ]
 )
 
 if __name__ == "__main__":
