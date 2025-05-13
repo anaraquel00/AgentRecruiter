@@ -12,6 +12,15 @@ class SuperCareerAgent:
         load_dotenv()
         self.openai_key = os.getenv("OPENAI_KEY")
         self.linkedin_key = os.getenv("LINKEDIN_KEY")
+
+        # No Hugging Face, use o diretório temporário
+        db_path = os.path.join(gettempdir(), "jobs.db")
+        self.conn = sqlite3.connect(db_path)
+        self._create_jobs_table()
+        
+        # Preencha com dados iniciais se necessário
+        if os.path.getsize(db_path) == 0:
+            self._seed_database()
         
         # Conecta ao banco de vagas (simulado)
         self.conn = sqlite3.connect("database/jobs.db")
@@ -35,6 +44,17 @@ class SuperCareerAgent:
             "LinkedIn": "https://api.linkedin.com/v3/jobs",
             "Indeed": "https://api.indeed.com/ads/apisearch"
         }
+
+    def _seed_database(self):
+    cursor = self.conn.cursor()
+    cursor.executemany(
+        "INSERT INTO vagas VALUES (?, ?, ?, ?, ?, ?)",
+        [
+            (1, "Desenvolvedor Python", "Empresa X", "Python/Django", "R$ 8.000", "https://exemplo.com/vaga1"),
+            (2, "Engenheiro de Dados", "Empresa Y", "Python/SQL", "R$ 12.000", "https://exemplo.com/vaga2")
+        ]
+    )
+    self.conn.commit()    
         
     def _create_jobs_table(self):
         cursor = self.conn.cursor()
