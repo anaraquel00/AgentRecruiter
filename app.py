@@ -1,4 +1,3 @@
-from career_agent import SuperCareerAgent
 import gradio as gr
 from datetime import datetime
 
