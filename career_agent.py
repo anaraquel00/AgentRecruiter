@@ -76,7 +76,7 @@ class SuperCareerAgent:
             stack = self._query_gpt4(f"Extraia a stack tech desta mensagem: '{message}'")
             jobs = self.get_real_jobs(stack)
             return self._format_jobs(jobs)
-        elif intent == "PLANO_CARREIRA":
+            elif intent == "PLANO_CARREIRA":
             # ... (outras lógicas existentes)
         # ... (demais casos)
 
@@ -86,7 +86,7 @@ class SuperCareerAgent:
             f"🛠️ {job[3]}\n"
             f"💵 {job[4]}\n"
             f"🔗 {job[5]}\n"
-            for job in jobs
+        for job in jobs
         )
 
     def respond(self, message, history, system_message, max_tokens, temperature):
