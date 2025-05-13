@@ -54,31 +54,37 @@ class SuperCareerAgent:
         return cursor.fetchall()
 
     def enhanced_respond(self, message, history):
-        # Novo: Usa GPT-4 para entender intenções complexas
-        gpt_prompt = f"""
-        Analise esta mensagem e classifique a intenção:
-        "{message}"
+    # Novo: Usa GPT-4 para entender intenções complexas
+    gpt_prompt = f"""
+    Analise esta mensagem e classifique a intenção:
+    "{message}"
 
-        Opções: 
-        - CURRICULO
-        - PLANO_CARREIRA 
-        - CARTA
-        - LINKEDIN
-        - SALARIO
-        - VAGAS
-        - OUTROS
+    Opções: 
+    - CURRICULO
+    - PLANO_CARREIRA 
+    - CARTA
+    - LINKEDIN
+    - SALARIO
+    - VAGAS
+    - OUTROS
 
-        Retorne apenas o tipo em MAIÚSCULAS.
-        """
-        intent = self._query_gpt4(gpt_prompt).strip()
+    Retorne apenas o tipo em MAIÚSCULAS.
+    """
+    intent = self._query_gpt4(gpt_prompt).strip()
 
-        if intent == "VAGAS":
-            stack = self._query_gpt4(f"Extraia a stack tech desta mensagem: '{message}'")
-            jobs = self.get_real_jobs(stack)
-            return self._format_jobs(jobs)
-            elif intent == "PLANO_CARREIRA":
-            # ... (outras lógicas existentes)
-        # ... (demais casos)
+    if intent == "VAGAS":
+        stack = self._query_gpt4(f"Extraia a stack tech desta mensagem: '{message}'")
+        jobs = self.get_real_jobs(stack)
+        return self._format_jobs(jobs)
+    
+    elif intent == "PLANO_CARREIRA":  # Agora alinhado com o 'if'
+        return self.generate_career_plan(message)  # Exemplo ajustado
+    
+    elif intent == "CURRICULO":
+        return self.generate_tech_resume()
+    
+    else:
+        return "Não entendi. Posso ajudar com: currículos, planos de carreira ou vagas."
 
     def _format_jobs(self, jobs):
         return "\n".join(
