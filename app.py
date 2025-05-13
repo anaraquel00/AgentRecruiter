@@ -79,10 +79,10 @@ class CareerAgent:
         )
         return "💻 Habilidades Tech por Área:\n" + skills_list
 
-# Cria a interface
+    # Cria a interface
 
     def main():
-    agent = SuperCareerAgent()
+        agent = SuperCareerAgent()
     
     with gr.Blocks() as demo:
         gr.Markdown("# 🚀 Assistente de Carreiras Tech")
