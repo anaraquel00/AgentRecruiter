@@ -54,7 +54,7 @@ class SuperCareerAgent:
         return cursor.fetchall()
 
     def enhanced_respond(self, message, history):
-    # Novo: Usa GPT-4 para entender intenções complexas
+    # Corpo da função DEVE estar indentado (4 espaços)
     gpt_prompt = f"""
     Analise esta mensagem e classifique a intenção:
     "{message}"
@@ -77,15 +77,18 @@ class SuperCareerAgent:
         jobs = self.get_real_jobs(stack)
         return self._format_jobs(jobs)
     
-    elif intent == "PLANO_CARREIRA":  # Agora alinhado com o 'if'
-        return self.generate_career_plan(message)  # Exemplo ajustado
+    elif intent == "PLANO_CARREIRA":
+        return self._generate_career_plan(message)
     
     elif intent == "CURRICULO":
-        return self.generate_tech_resume()
+        return self._generate_tech_resume()
+    
+    elif intent == "CARTA":
+        return self._generate_cover_letter(message)
     
     else:
-        return "Não entendi. Posso ajudar com: currículos, planos de carreira ou vagas."
-
+        return "Como posso ajudar com sua carreira tech? (currículo, plano, vagas)"
+    
     def _format_jobs(self, jobs):
         return "\n".join(
             f"🏢 **{job[1]}** @ {job[2]}\n"
