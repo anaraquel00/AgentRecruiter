@@ -38,7 +38,7 @@ class SuperCareerAgent:
         """)
         self.conn.commit()
 
-         def _query_gpt4(self, prompt):
+    def _query_gpt4(self, prompt):
         response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[{"role": "system", "content": prompt}],
