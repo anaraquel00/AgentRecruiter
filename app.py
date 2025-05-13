@@ -96,5 +96,5 @@ class CareerAgent:
     return demo
 
     if __name__ == "__main__":
-    demo = main()
-    demo.launch()
+        demo = main()
+        demo.launch()
