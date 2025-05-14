@@ -83,7 +83,7 @@ class CareerAgent:
 
     def create_app():  
    
-    agent = SuperCareerAgent()  
+     agent = SuperCareerAgent()  
     
     with gr.Blocks() as app:
         gr.Markdown("# 🤖 Mentor de Carreiras Tech")
@@ -94,10 +94,18 @@ class CareerAgent:
                 "Quais habilidades aprender para Data Science?"
             ]
         )
+
+
+        gr.Markdown(
+            """
+            ## 💡 Dicas:
+            - Pergunte sobre **currículos** ou **planos de carreira**.
+            - Explore **habilidades** em diferentes áreas.
+            """
+        )
     
-        return app  # Continua indentado dentro da função
 
 
-        if __name__ == "__main__":
+if __name__ == "__main__":
             app = create_app()
-            app.launch()
+            app.launch() 
