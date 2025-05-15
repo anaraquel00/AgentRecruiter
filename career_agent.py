@@ -46,8 +46,8 @@ class CareerAgent:
         }
 
     def _seed_database(self):
-    cursor = self.conn.cursor()
-    cursor.executemany(
+        cursor = self.conn.cursor()
+        cursor.executemany(
         "INSERT INTO vagas VALUES (?, ?, ?, ?, ?, ?)",
         [
             (1, "Desenvolvedor Python", "Empresa X", "Python/Django", "R$ 8.000", "https://exemplo.com/vaga1"),
