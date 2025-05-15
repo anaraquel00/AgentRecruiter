@@ -4,8 +4,6 @@ from dotenv import load_dotenv
 load_dotenv()  
 from career_agent import SuperCareerAgent
 
-agent = SuperCareerAgent()
-
 class CareerAgent:
     def __init__(self):
         self.tech_skills = {
@@ -79,7 +77,7 @@ class CareerAgent:
         return "💻 Habilidades Tech por Área:\n" + skills_list
 
 def create_app():  
-    agent = SuperCareerAgent()  # Corrigido para usar a classe local
+    agent = SuperCareerAgent()  
     
     with gr.Blocks() as app:
         gr.Markdown("# 🤖 Mentor de Carreiras Tech")
@@ -88,14 +86,20 @@ def create_app():
             examples=[
                 "Como criar um currículo para DevOps?",
                 "Quais habilidades aprender para Data Science?"
+            ],
+            additional_inputs=[
+                gr.Textbox("", label="System Message", visible=False),
+                gr.Slider(100, 2000, value=500, label="Max Tokens"),
+                gr.Slider(0.1, 1.0, value=0.7, label="Temperature"),
+                gr.Slider(0.1, 1.0, value=0.9, label="Top-p")
             ]
         )
 
         gr.Markdown(
             """
             ## 💡 Dicas:
-            - Pergunte sobre **currículos** ou **planos de carreira**.
-            - Explore **habilidades** em diferentes áreas.
+            - Pergunte sobre **currículos** ou **planos de carreira**
+            - Explore **habilidades** em diferentes áreas
             """
         )
     
