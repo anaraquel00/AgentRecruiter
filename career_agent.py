@@ -7,7 +7,7 @@ import requests
 from dotenv import load_dotenv
 import os
 
-class SuperCareerAgent:
+class CareerAgent:
     def __init__(self):
         load_dotenv()
         self.openai_key = os.getenv("OPENAI_KEY")
@@ -266,7 +266,7 @@ Sênior: R$ {self.salary_data['Sênior']['min']/1000}k-{self.salary_data['Sênio
         )
 
 # Configuração da Interface
-agent = SuperCareerAgent()
+agent = CareerAgent()
 
 demo = gr.ChatInterface(
     agent.enhanced_respond,  # Mudei para usar enhanced_respond
