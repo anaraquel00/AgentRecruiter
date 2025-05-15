@@ -1,6 +1,5 @@
 import gradio as gr
 from datetime import datetime
-
 from dotenv import load_dotenv
 load_dotenv()  
 from career_agent import SuperCareerAgent
@@ -79,22 +78,18 @@ class CareerAgent:
         )
         return "💻 Habilidades Tech por Área:\n" + skills_list
 
-    # Cria a interface
-
-    def create_app():  
-   
-     agent = SuperCareerAgent()  
+def create_app():  
+    agent = SuperCareerAgent()  # Corrigido para usar a classe local
     
     with gr.Blocks() as app:
         gr.Markdown("# 🤖 Mentor de Carreiras Tech")
         gr.ChatInterface(
-            fn=agent.enhanced_respond,
+            fn=agent.generate_response,
             examples=[
                 "Como criar um currículo para DevOps?",
                 "Quais habilidades aprender para Data Science?"
             ]
         )
-
 
         gr.Markdown(
             """
@@ -104,8 +99,8 @@ class CareerAgent:
             """
         )
     
-
+    return app
 
 if __name__ == "__main__":
-            app = create_app()
-            app.launch() 
+    app = create_app()
+    app.launch()
