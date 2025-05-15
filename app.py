@@ -2,7 +2,7 @@ import gradio as gr
 from datetime import datetime
 from dotenv import load_dotenv
 load_dotenv()  
-from career_agent import SuperCareerAgent
+from career_agent import CareerAgent
 
 class CareerAgent:
     def __init__(self):
@@ -77,7 +77,7 @@ class CareerAgent:
         return "💻 Habilidades Tech por Área:\n" + skills_list
 
 def create_app():  
-    agent = SuperCareerAgent()  
+    agent = CareerAgent()  
     
     with gr.Blocks() as app:
         gr.Markdown("# 🤖 Mentor de Carreiras Tech")
