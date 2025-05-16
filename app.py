@@ -1,8 +1,12 @@
-import gradio as gr
+from asyncio import create_task
+import gradio as gr # type: ignore
 from datetime import datetime
-from dotenv import load_dotenv
-load_dotenv()  
-from career_agent import CareerAgent
+
+from dotenv import load_dotenv # type: ignore
+load_dotenv()  # Carrega antes de importar outras classes
+from career_agent import CareerAgent # type: ignore
+
+agent = CareerAgent()
 
 class CareerAgent:
     def __init__(self):
@@ -76,35 +80,33 @@ class CareerAgent:
         )
         return "💻 Habilidades Tech por Área:\n" + skills_list
 
-def create_app():  
-    agent = CareerAgent()  
+    # Cria a interface
+
+    def create_app():  
+   
+     agent = CareerAgent()  
     
     with gr.Blocks() as app:
         gr.Markdown("# 🤖 Mentor de Carreiras Tech")
         gr.ChatInterface(
-            fn=agent.generate_response,
+            fn=agent.enhanced_respond, # type: ignore
             examples=[
                 "Como criar um currículo para DevOps?",
                 "Quais habilidades aprender para Data Science?"
-            ],
-            additional_inputs=[
-                gr.Textbox("", label="System Message", visible=False),
-                gr.Slider(100, 2000, value=500, label="Max Tokens"),
-                gr.Slider(0.1, 1.0, value=0.7, label="Temperature"),
-                gr.Slider(0.1, 1.0, value=0.9, label="Top-p")
             ]
         )
+
 
         gr.Markdown(
             """
             ## 💡 Dicas:
-            - Pergunte sobre **currículos** ou **planos de carreira**
-            - Explore **habilidades** em diferentes áreas
+            - Pergunte sobre **currículos** ou **planos de carreira**.
+            - Explore **habilidades** em diferentes áreas.
             """
         )
     
-    return app
+
 
 if __name__ == "__main__":
-    app = create_app()
-    app.launch()
+            app = create_task() # type: ignore
+            app.launch() 
