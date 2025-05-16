@@ -1,10 +1,10 @@
-import gradio as gr
+from tempfile import gettempdir
+import gradio as gr # type: ignore
 import random
 from datetime import datetime
-import openai
+import openai # type: ignore
 import sqlite3
-import requests
-from dotenv import load_dotenv
+from dotenv import load_dotenv # type: ignore
 import os
 
 class CareerAgent:
@@ -46,15 +46,15 @@ class CareerAgent:
         }
 
     def _seed_database(self):
-        cursor = self.conn.cursor()
-        cursor.executemany(
+     cursor = self.conn.cursor()
+     cursor.executemany(
         "INSERT INTO vagas VALUES (?, ?, ?, ?, ?, ?)",
         [
             (1, "Desenvolvedor Python", "Empresa X", "Python/Django", "R$ 8.000", "https://exemplo.com/vaga1"),
             (2, "Engenheiro de Dados", "Empresa Y", "Python/SQL", "R$ 12.000", "https://exemplo.com/vaga2")
         ]
     )
-    self.conn.commit()    
+     self.conn.commit()    
         
     def _create_jobs_table(self):
         cursor = self.conn.cursor()
@@ -88,7 +88,6 @@ class CareerAgent:
         gpt_prompt = f"""
         Analise esta mensagem e classifique a intenção:
         "{message}"
-
         Opções: 
         - CURRICULO
         - PLANO_CARREIRA 
@@ -97,7 +96,6 @@ class CareerAgent:
         - SALARIO
         - VAGAS
         - OUTROS
-
         Retorne apenas o tipo em MAIÚSCULAS.
         """
         intent = self._query_gpt4(gpt_prompt).strip()
@@ -151,7 +149,6 @@ class CareerAgent:
 4️⃣ "Análise LinkedIn" - Dicas para otimizar
 5️⃣ "Comparar Salários" - Por stack e experiência
 6️⃣ "Habilidades" - Lista por área tech
-
 Exemplo: "Gere um currículo para backend pleno"
         """
         return menu
@@ -163,11 +160,9 @@ Exemplo: "Gere um currículo para backend pleno"
         
         resume = f"""
 📄 **CURRÍCULO TECH - {stack.upper()} {level}**  
-
 **Nome:** [Seu Nome]  
 **GitHub:** [seu-usuario]  
 **Stack Principal:** {', '.join(self.tech_stacks[stack]['skills'][:3])}  
-
 ## 💼 Experiência  
 **{stack} Developer @ [Empresa]**  
 - {' '.join(random.choice([
@@ -175,10 +170,8 @@ Exemplo: "Gere um currículo para backend pleno"
     "Criei dashboards com React e TypeScript",
     "Implementei pipelines de CI/CD"
 ]))}  
-
 ## 🛠️ Tech Stack  
 {self.format_skills(stack)}  
-
 💡 *Dica: Personalize com projetos reais do GitHub!*
         """
         return resume
@@ -187,15 +180,12 @@ Exemplo: "Gere um currículo para backend pleno"
         years = 3 if "curto" in prompt else 5 if "médio" in prompt else 10
         roadmap = f"""
 🚀 **ROADMAP TECH - {years} ANOS**  
-
 1️⃣ **Primeiro Ano**  
 - Dominar fundamentos de algoritmos  
 - Construir 3 projetos no GitHub  
-
 2️⃣ **Ano {years//2}**  
 - Especializar-se em {random.choice(list(self.tech_stacks))}  
 - Obter 1 certificação relevante  
-
 3️⃣ **Ano {years}**  
 - Alcançar nível Sênior  
 - {' '.join(random.choice([
@@ -210,17 +200,12 @@ Exemplo: "Gere um currículo para backend pleno"
         company = "Google" if "google" in prompt else "Startup" if "startup" in prompt else "Sua Empresa"
         letter = f"""
 ✉️ **CARTA PARA {company.upper()}**  
-
 Prezados(as),  
-
 Meu nome é [Seu Nome] e sou especialista em [Sua Stack].  
 Ao ver a vaga para [Nome da Vaga], identifiquei compatibilidade com:  
-
 - {random.choice(list(self.tech_stacks))} (3+ anos experiência)  
 - Projeto relevante: [Descreva brevemente]  
-
 Tenho grande interesse em contribuir para {company} porque...  
-
 Atenciosamente,  
 [Seu Nome]  
         """
@@ -229,15 +214,12 @@ Atenciosamente,
     def analyze_linkedin_profile(self, prompt):
         analysis = """
 🔍 **ANÁLISE DE PERFIL LINKEDIN**  
-
 ✅ Pontos fortes:  
 - Descrição clara da stack tech  
 - Projetos com resultados mensuráveis  
-
 ⚠️ Para melhorar:  
 - Adicione certificações na seção dedicada  
 - Inclua números (ex: "Otimizei performance em 40%")  
-
 💡 Dica premium:  
 Use palavras-chave como "{sua stack} + {frameworks}" no título  
         """
@@ -247,11 +229,9 @@ Use palavras-chave como "{sua stack} + {frameworks}" no título
         stack = next((s for s in self.tech_stacks if s.lower() in prompt), "Fullstack")
         comparison = f"""
 💰 **SALÁRIOS EM {stack.upper()}**  
-
 Júnior: R$ {self.salary_data['Júnior']['min']/1000}k-{self.salary_data['Júnior']['max']/1000}k  
 Pleno: R$ {self.salary_data['Pleno']['min']/1000}k-{self.salary_data['Pleno']['max']/1000}k  
 Sênior: R$ {self.salary_data['Sênior']['min']/1000}k-{self.salary_data['Sênior']['max']/1000}k+  
-
 💡 Dica: Salários em FAANG podem ser 2-3x maiores  
         """
         return comparison
