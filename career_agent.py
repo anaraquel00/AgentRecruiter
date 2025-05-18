@@ -111,11 +111,15 @@ class CareerAgent:
         return " | ".join(salaries) if salaries else ""
 
     def _general_response(self) -> str:
-        """Resposta padrão para intenções não reconhecidas"""
-        return ("Posso ajudar com:\n"
-            "- Modelos de currículo\n"
-            "- Informações salariais\n"
-            "- Dicas de carreira")
+        """Respostas personalizadas"""
+        return (
+            "🎯 Serviços disponíveis:\n\n"
+            "1. 🔍 Análise de currículo\n"
+            "2. 💰 Pesquisa salarial\n"
+            "3. 📌 Vagas personalizadas\n"
+            "4. 🚀 Planos de carreira\n\n"
+            "Como posso ajudar você hoje?"
+        )
 
     @lru_cache(maxsize=100)
     def _classify_intent(self, message: str) -> str:
@@ -132,10 +136,18 @@ class CareerAgent:
             return "OUTROS"
 
     def _local_fallback(self, message: str) -> str:
-        """Respostas locais pré-definidas"""
-        if any(kw in message for kw in ["currículo", "cv"]):
-            return "📄 Modelo de currículo:\n- Habilidades técnicas\n- Experiência profissional"
-            return "Como posso ajudar com sua carreira tech?"
+        """Respostas de fallback melhoradas"""
+        if any(kw in message.lower() for kw in ["currículo", "cv", "modelo"]):
+            return ("📝 **Modelo de Currículo Tech:**\n"
+                    "- Seção de Skills Técnicas\n"
+                    "- Projetos Relevantes\n"
+                    "- Certificações\n"
+                    "- Experiência Profissional (com métricas)")
+                    
+        elif any(kw in message.lower() for kw in ["salário", "remuneração"]):
+            return "💵 Consulte salários por stack:\n- Frontend: R$ 4k-12k\n- Backend: R$ 5k-15k"
+            
+        return "🌟 Conte-me mais sobre seus objetivos profissionais!"
 
     
     def _seed_database(self):
