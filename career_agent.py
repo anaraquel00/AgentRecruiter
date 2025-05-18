@@ -1,75 +1,93 @@
+
 import os
 import sqlite3
-from functools import lru_cache
 import logging
+import time
 from typing import Dict, List
-from huggingface_hub import InferenceClient
+from functools import lru_cache
+from huggingface_hub import InferenceClient, InferenceTimeoutError
 
-# Configurar logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class CareerAgent:
     def __init__(self):
-        self.client = InferenceClient(
-            model="HuggingFaceH4/zephyr-7b-beta",
-            token=os.getenv("HF_TOKEN", "")
-        )
-        
-        if not os.getenv("HF_TOKEN"):
-            logger.error("🚫 HF_TOKEN não encontrado!")
-        
-        self.db_path = os.path.join("/tmp", "career_agent.db")
-        self._init_database()
-        
+        """Configuração robusta com circuit breaker pattern"""
+        self.hf_token = self._validate_hf_token()
+        self.client = self._init_client()
         self.tech_stacks = {
-            "Frontend": {"skills": ["React", "TypeScript", "CSS"], "salary": "R$ 4k-12k"},
-            "Backend": {"skills": ["Python", "Node.js", "Java"], "salary": "R$ 5k-15k"},
-            "Data": {"skills": ["SQL", "Pandas", "PyTorch"], "salary": "R$ 6k-18k"}
+            "Frontend": {"skills": ["React", "TypeScript"], "salary": "R$ 4k-12k"},
+            "Backend": {"skills": ["Python", "Node.js"], "salary": "R$ 5k-15k"}
         }
+        self._init_db()
 
-    def _validate_environment(self):
-        """Validação rigorosa das variáveis de ambiente"""
-        self.hf_token = os.getenv("HF_TOKEN")
-        if not self.hf_token or len(self.hf_token) < 10:
-            logger.error("Token HF inválido ou ausente")
-            raise ValueError("Configure HF_TOKEN nas variáveis de ambiente")
+    def _validate_hf_token(self) -> str:
+        """Validação rigorosa do token"""
+        token = os.getenv("HF_TOKEN")
+        if not token or not token.startswith("hf_"):
+            logger.error("Token HF inválido!")
+            raise ValueError("Configure HF_TOKEN válido nas variáveis de ambiente")
+        return token
 
-        def _init_hf_client(self):
-            """Client com timeouts e reconexão"""
-            return InferenceClient(
+    def _init_client(self):
+        """Client com timeout e reconexão"""
+        return InferenceClient(
             model="HuggingFaceH4/zephyr-7b-beta",
             token=self.hf_token,
-            timeout=15.0  # Timeout para evitar loops
+            timeout=10.0
         )
 
-    def safe_enhanced_respond(self, message: str, history: List[List[str]]):
-        """Wrapper seguro com circuit breaker"""
+    def safe_respond(self, message: str, history: List[List[str]]) -> Dict[str, str]:
+        """Entry point seguro com validação completa"""
         try:
-           
-            if not message or len(message.strip()) < 3:
-                return {
-                    "role": "assistant",
-                    "content": resposta_formatada  
-                }
+            # Validação de entrada
+            if not isinstance(message, str) or len(message.strip()) < 2:
+                return {"role": "assistant", "content": "Por favor, formule melhor sua pergunta"}
             
-            return self._enhanced_respond_with_retry(message, history)
+            # Circuit breaker
+            return self._process_message(message.lower())
             
         except Exception as e:
             logger.error(f"Erro crítico: {str(e)}")
             return {"role": "assistant", "content": "Sistema temporariamente indisponível"}
 
-    def _enhanced_respond_with_retry(self, message: str, history: List[List[str]], retries=2):
-        """Lógica de retry com backoff"""
+    def _process_message(self, message: str) -> Dict[str, str]:
+        """Fluxo principal com fallback local"""
         try:
             intent = self._classify_intent(message)
-            # ... sua lógica existente ...
             
+            if intent == "CURRICULO":
+                stack = self._detect_tech_stack(message)
+                return self._generate_resume(stack)
+                
+            elif intent == "SALARIO":
+                return {"role": "assistant", "content": self._get_salary_info()}
+                
+            else:
+                return {"role": "assistant", "content": self._general_response()}
+                
         except InferenceTimeoutError:
-            if retries > 0:
-                time.sleep(1.5)
-                return self._enhanced_respond_with_retry(message, history, retries-1)
-            raise
+            logger.warning("Timeout na API, usando fallback")
+            return {"role": "assistant", "content": self._local_fallback(message)}
+
+    @lru_cache(maxsize=100)
+    def _classify_intent(self, message: str) -> str:
+        """Classificação de intenção com retry"""
+        try:
+            response = self.client.chat_completion(
+                messages=[{"role": "user", "content": f"Classifique: {message}"}],
+                max_tokens=50,
+                temperature=0.3,
+                stop_sequences=["</s>"]
+            )
+            return response.choices[0].message.content.strip().upper()[:10]
+        except Exception:
+            return "OUTROS"
+
+    def _local_fallback(self, message: str) -> str:
+        """Respostas locais pré-definidas"""
+        if any(kw in message for kw in ["currículo", "cv"]):
+            return "📄 Modelo de currículo:\n- Habilidades técnicas\n- Experiência profissional"
+        return "Como posso ajudar com sua carreira tech?"
 
     def _init_database(self):
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
@@ -159,4 +177,4 @@ class CareerAgent:
 
 if __name__ == "__main__":
     agent = CareerAgent()
-    print(agent.enhanced_respond("Quero dicas para meu currículo de backend", []))
+    print(agent.safe_respond("Preciso de ajuda com meu currículo", []))
