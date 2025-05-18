@@ -1,9 +1,9 @@
 from tempfile import gettempdir
+from huggingface_hub import InferenceClient
 import gradio as gr # type: ignore
 import random
 from typing import List, Dict
 from datetime import datetime
-import openai # type: ignore
 import sqlite3
 from dotenv import load_dotenv # type: ignore
 import os
@@ -11,8 +11,8 @@ import os
 class CareerAgent:
     def __init__(self):
         load_dotenv()
-        self.openai_key = os.getenv("OPENAI_KEY")
-        self.linkedin_key = os.getenv("LINKEDIN_KEY")
+        self.client = InferenceClient(token=os.getenv("HF_TOKEN"))
+        self.model = "mistralai/Mixtral-8x7B-Instruct-v0.1"
 
         # No Hugging Face, use o diretório temporário
         db_path = os.path.join(gettempdir(), "jobs.db")
@@ -43,12 +43,24 @@ class CareerAgent:
         }
 
         self.job_boards = {
-            "LinkedIn": "https://api.linkedin.com/v3/jobs",
             "Indeed": "https://api.indeed.com/ads/apisearch"
         }
-        print(f"🔑 OpenAI key: {self.openai_key[:5]}...")  # Mostra os primeiros chars
-        print(f"📂 Banco criado em: {db_path}")
+        
 
+    def _query_llm(self, prompt):
+        try:
+            response = self.client.chat_completion(
+                model=self.model,
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=1000,
+                temperature=0.7
+            )
+            return response.choices[0].message.content
+            
+        except Exception as e:
+            print(f"Erro na API do Hugging Face: {str(e)}")
+            return self._local_fallback(prompt)  # Usar fallback local
+     
     def _seed_database(self):
         cursor = self.conn.cursor()
         cursor.executemany(  # <-- Alinhar com cursor
