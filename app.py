@@ -45,10 +45,13 @@ def create_interface():
         return gr.Blocks()
 
 if __name__ == "__main__":
-    app = create_interface()
-    app.launch(
-        server_name="0.0.0.0",
-        server_port=7860,
-        show_error=True,
-        favicon_path="./icon.png"
-    )
+    try:
+        app = create_interface()
+        app.launch(
+            server_name="0.0.0.0",
+            server_port=7860,
+            show_api=False  
+        )
+    except Exception as e:
+        logger.critical(f"Falha total: {str(e)}")
+        raise
