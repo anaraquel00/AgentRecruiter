@@ -89,7 +89,7 @@ class CareerAgent:
             return "📄 Modelo de currículo:\n- Habilidades técnicas\n- Experiência profissional"
         return "Como posso ajudar com sua carreira tech?"
 
-    def _init_database(self):
+    def _init_db(self):
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
         self.conn = sqlite3.connect(self.db_path)
         cursor = self.conn.cursor()
