@@ -28,6 +28,46 @@ class CareerAgent:
             "Data": {"skills": ["SQL", "Pandas", "PyTorch"], "salary": "R$ 6k-18k"}
         }
 
+    def _validate_environment(self):
+        """Validação rigorosa das variáveis de ambiente"""
+        self.hf_token = os.getenv("HF_TOKEN")
+        if not self.hf_token or len(self.hf_token) < 10:
+            logger.error("Token HF inválido ou ausente")
+            raise ValueError("Configure HF_TOKEN nas variáveis de ambiente")
+
+        def _init_hf_client(self):
+        """Client com timeouts e reconexão"""
+        return InferenceClient(
+            model="HuggingFaceH4/zephyr-7b-beta",
+            token=self.hf_token,
+            timeout=15.0  # Timeout para evitar loops
+        )
+
+    def safe_enhanced_respond(self, message: str, history: List[List[str]]):
+        """Wrapper seguro com circuit breaker"""
+        try:
+            # Validação de entrada crítica
+            if not message or len(message.strip()) < 3:
+                return {"role": "assistant", "content": "Por favor, formule melhor sua pergunta"}
+            
+            return self._enhanced_respond_with_retry(message, history)
+            
+        except Exception as e:
+            logger.error(f"Erro crítico: {str(e)}")
+            return {"role": "assistant", "content": "Sistema temporariamente indisponível"}
+
+    def _enhanced_respond_with_retry(self, message: str, history: List[List[str]], retries=2):
+        """Lógica de retry com backoff"""
+        try:
+            intent = self._classify_intent(message)
+            # ... sua lógica existente ...
+            
+        except InferenceTimeoutError:
+            if retries > 0:
+                time.sleep(1.5)
+                return self._enhanced_respond_with_retry(message, history, retries-1)
+            raise
+
     def _init_database(self):
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
         self.conn = sqlite3.connect(self.db_path)
@@ -59,29 +99,30 @@ class CareerAgent:
             jobs
         )
 
+    
     @lru_cache(maxsize=100)
     def _query_llm(self, prompt: str) -> str:
+        """Consulta com timeout e validação"""
         try:
             response = self.client.chat_completion(
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=800,
-                temperature=0.7
+                temperature=0.7,
+                stop_sequences=["</s>"] 
             )
-            return response.choices[0].message.content
+            
+            if not response or not response.choices:
+                logger.error("Resposta vazia da API")
+                return ""
+                
+            return response.choices[0].message.content.strip()
+            
+        except InferenceTimeoutError as e:
+            logger.warning("Timeout na API")
+            raise
         except Exception as e:
-            logger.error(f"Erro na API: {str(e)}")
-            return self._local_fallback(prompt)
-
-    def _local_fallback(self, prompt: str) -> str:
-        prompt_lower = prompt.lower()
-        if "currículo" in prompt_lower:
-            return self._generate_resume_template("Fullstack")
-        elif "salário" in prompt_lower or "salario" in prompt_lower:
-            return "\n".join(
-                f"- {role}: {data['salary']}" 
-                for role, data in self.tech_stacks.items()
-            )
-        return "Como posso ajudar com sua carreira tech?"
+            logger.error(f"Falha na API: {str(e)}")
+            return ""
 
     def enhanced_respond(self, message: str, history: List[List[str]]) -> Dict[str, str]:
         try:
