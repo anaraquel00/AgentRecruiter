@@ -33,3 +33,4 @@ if __name__ == "__main__":
         server_port=7860,
         enable_queue=True,
         max_threads=2 
+    )    
