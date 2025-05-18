@@ -2,6 +2,7 @@ import os
 import sqlite3
 import logging
 from typing import Dict, List
+from functools import lru_cache
 from huggingface_hub import InferenceClient
 
 logger = logging.getLogger(__name__)
