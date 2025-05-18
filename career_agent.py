@@ -70,21 +70,21 @@ class CareerAgent:
         }
     
     def _process_message(self, message: str) -> Dict[str, str]:
-    """Fluxo principal com fallback local"""
-    try:
-        intent = self._classify_intent(message)
-        
-        if intent == "CURRICULO":
-            stack = self._detect_tech_stack(message)
-            content = self._generate_resume_template(stack)
-            return {"role": "assistant", "content": content or "Modelo não disponível"}
+        """Fluxo principal com fallback local"""
+        try:
+            intent = self._classify_intent(message)
             
-        elif intent == "SALARIO":
-            content = self._get_salary_info()
-            return {"role": "assistant", "content": content or "Informações salariais indisponíveis"}
-            
-        else:
-            return {"role": "assistant", "content": self._general_response() or "Como posso ajudar?"}
+            if intent == "CURRICULO":
+                stack = self._detect_tech_stack(message)
+                content = self._generate_resume_template(stack)
+                return {"role": "assistant", "content": content or "Modelo não disponível"}
+                
+            elif intent == "SALARIO":
+                content = self._get_salary_info()
+                return {"role": "assistant", "content": content or "Informações salariais indisponíveis"}
+                
+            else:
+                return {"role": "assistant", "content": self._general_response() or "Como posso ajudar?"}
             
     except (httpx.ReadTimeout, httpx.ConnectError) as e:
         logger.warning(f"Timeout na API: {str(e)}")
