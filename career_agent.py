@@ -55,13 +55,13 @@ class CareerAgent:
         self.conn.commit()
 
     def _detect_tech_stack(self, message: str) -> str:
-    """Detecta a stack tecnológica mencionada na mensagem"""
-    message_lower = message.lower()
-    if any(kw in message_lower for kw in ["front", "react", "javascript"]):
-        return "Frontend"
-    elif any(kw in message_lower for kw in ["back", "python", "node"]):
-        return "Backend"
-    return "Fullstack"
+        """Detecta a stack tecnológica mencionada na mensagem"""
+        message_lower = message.lower()
+        if any(kw in message_lower for kw in ["front", "react", "javascript"]):
+            return "Frontend"
+        elif any(kw in message_lower for kw in ["back", "python", "node"]):
+            return "Backend"
+            return "Fullstack"
 
     def _init_tech_stacks(self):  
         self.tech_stacks = {
