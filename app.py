@@ -15,8 +15,8 @@ def create_app():
         gr.ChatInterface(
             fn=agent.enhanced_respond,
             examples=[
-                "Como criar um currículo para DevOps?",
-                "Quais habilidades aprender para Data Science?"
+                "Como criar um currículo para Desenvolvedor BackEnd?",
+                "Quais habilidades aprender em Java?"
             ]
         )
         
@@ -27,5 +27,5 @@ def create_app():
     return app
 
 if __name__ == "__main__":
-    app = create_app()
-    app.launch()
+    app = create_interface()
+    app.launch(server_name="0.0.0.0", server_port=7860)
