@@ -46,9 +46,12 @@ class CareerAgent:
     def safe_enhanced_respond(self, message: str, history: List[List[str]]):
         """Wrapper seguro com circuit breaker"""
         try:
-            # Validação de entrada crítica
+           
             if not message or len(message.strip()) < 3:
-                return {"role": "assistant", "content": "Por favor, formule melhor sua pergunta"}
+                return {
+                    "role": "assistant",
+                    "content": resposta_formatada  
+                }
             
             return self._enhanced_respond_with_retry(message, history)
             
