@@ -65,8 +65,21 @@ class CareerAgent:
 
     def _init_tech_stacks(self):  
         self.tech_stacks = {
-            "Frontend": {"skills": ["React", "TypeScript"], "salary": "R$ 4k-12k"},
-            "Backend": {"skills": ["Python", "Node.js"], "salary": "R$ 5k-15k"}
+            "Frontend": {
+                "skills": ["React", "TypeScript", "Next.js", "Jest"],
+                "salary": "R$ 4.500 - R$ 14.000",
+                "dicas": ["Domine componentização", "Aprimore acessibilidade"]
+            },
+            "Backend": {
+                "skills": ["Python", "FastAPI", "Docker", "PostgreSQL"],
+                "salary": "R$ 6.000 - R$ 16.000",
+                "dicas": ["Estude arquitetura limpa", "Aprenda Kubernetes"]
+            },
+            "Data Science": {
+                "skills": ["Python", "Pandas", "MLflow", "Spark"],
+                "salary": "R$ 8.000 - R$ 20.000",
+                "dicas": ["Domine visualização de dados", "Pratique feature engineering"]
+            }
         }
     
     def _process_message(self, message: str) -> Dict[str, str]:
@@ -123,18 +136,55 @@ class CareerAgent:
 
     @lru_cache(maxsize=100)
     def _classify_intent(self, message: str) -> str:
-        """Classificação de intenção com retry"""
-        try:
-            response = self.client.chat_completion(
-                messages=[{"role": "user", "content": f"Classifique: {message}"}],
-                max_tokens=50,
-                temperature=0.3,
-                stop_sequences=["</s>"]
-            )
-            return response.choices[0].message.content.strip().upper()[:10]
-        except Exception:
+        """
+        Classifica a intenção do usuário com fallback robusto.
+        Retorna uma das opções: VAGAS, CURRICULO, SALARIO, PLANO, OUTROS
+        """
+        # Limpeza básica da mensagem
+        cleaned_msg = message.lower().strip()
+        
+        # Fallback rápido para mensagens muito curtas
+        if len(cleaned_msg) < 3:
             return "OUTROS"
-
+        
+        # Dicionário de palavras-chave para fallback local
+        keyword_map = {
+            "VAGAS": ["vaga", "emprego", "oportunidad", "contrataç"],
+            "CURRICULO": ["currículo", "cv", "modelo", "resume"],
+            "SALARIO": ["salário", "remuneraç", "ganho", "pagamento"],
+            "PLANO": ["plano", "carreira", "progressão", "trajetória"]
+        }
+        
+        # Primeiro verifica por palavras-chave locais (rápido)
+        for intent, keywords in keyword_map.items():
+            if any(keyword in cleaned_msg for keyword in keywords):
+                return intent
+        
+        # Se não encontrou, usa o LLM para classificação refinada
+        try:
+            prompt = f"""Analise esta mensagem e classifique a intenção:
+    
+            Mensagem: "{message}"
+    
+            Opções (responda APENAS com a palavra-chave correspondente):
+            - VAGAS: Perguntas sobre vagas, oportunidades ou processos seletivos
+            - CURRICULO: Pedidos relacionados à criação ou revisão de currículos
+            - SALARIO: Consultas sobre faixas salariais ou benefícios
+            - PLANO: Orientação sobre planejamento de carreira
+            - OUTROS: Qualquer outro assunto não listado
+    
+            Intenção:"""
+            
+            response = self._query_llm(prompt).strip().upper()
+            
+            # Validação da resposta do LLM
+            valid_intents = ["VAGAS", "CURRICULO", "SALARIO", "PLANO"]
+            return response if response in valid_intents else "OUTROS"
+            
+        except Exception as e:
+            logger.error(f"Erro na classificação: {str(e)}")
+            return "OUTROS"  
+            
     def _local_fallback(self, message: str) -> str:
         """Respostas de fallback melhoradas"""
         if any(kw in message.lower() for kw in ["currículo", "cv", "modelo"]):
