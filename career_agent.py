@@ -1,15 +1,27 @@
 import os
 import sqlite3
-from typing import Dict, List, Optional
 from functools import lru_cache
-from huggingface_hub import InferenceClient
 from datetime import datetime
+import logging
+from typing import Dict, List
+from huggingface_hub import InferenceClient
+
+# Configurar logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class CareerAgent:
     def __init__(self):
-        """Inicializa o agente com configurações para Hugging Face Inference API"""
-        self.client = InferenceClient(token=os.getenv("HF_TOKEN", ""))
-        self.model = "HuggingFaceH4/zephyr-7b-beta"  # Modelo rápido e eficiente
+        """Configuração robusta para Hugging Face Inference API"""
+        self.client = InferenceClient(
+            model="HuggingFaceH4/zephyr-7b-beta",
+            token=os.getenv("HF_TOKEN", "")  # Garanta que HF_TOKEN está nos Secrets
+        )
+        
+        # Verificação crítica do token
+        if not os.getenv("HF_TOKEN"):
+            logger.error("🚫 HF_TOKEN não encontrado! Verifique os Secrets do Hugging Face")
+        
         
         # Configuração do banco de dados
         self.db_path = os.path.join("/tmp", "career_agent.db")
@@ -59,29 +71,29 @@ class CareerAgent:
 
     @lru_cache(maxsize=100)
     def _query_llm(self, prompt: str) -> str:
-        """
-        Consulta o modelo LLM do Hugging Face com cache
-        Args:
-            prompt: Texto formatado no formato do modelo escolhido
-        Returns:
-            Resposta do modelo ou fallback local
-        """
+        """Consulta otimizada para a API de chat do Hugging Face"""
         try:
-            response = self.client.post(
-                json={
-                    "inputs": prompt,
-                    "parameters": {
-                        "max_new_tokens": 800,
-                        "temperature": 0.7,
-                        "do_sample": True
-                    }
-                },
-                model=self.model
+            logger.info(f"Enviando prompt para {self.client.model}: {prompt[:50]}...")
+            
+            # Sintaxe corrigida para chat
+            response = self.client.chat_completion(
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=800,
+                temperature=0.7
             )
-            return response.json()[0]["generated_text"]
+            
+            # Debug detalhado
+            logger.debug(f"Resposta completa da API: {response}")
+            
+            if not response or not response.choices:
+                raise ValueError("Resposta vazia da API")
+                
+            return response.choices[0].message.content
+            
         except Exception as e:
-            print(f"⚠️ Erro na API: {str(e)}")
+            logger.error(f"Erro na API: {str(e)}", exc_info=True)
             return self._local_fallback(prompt)
+
 
     def _local_fallback(self, prompt: str) -> str:
         """Respostas pré-definidas quando a API falha"""
