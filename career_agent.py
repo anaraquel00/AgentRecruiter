@@ -75,8 +75,8 @@ class CareerAgent:
             intent = self._classify_intent(message)
         
             if intent == "CURRICULO":
-            stack = self._detect_tech_stack(message)
-            content = self._generate_resume_template(stack)  # Garante conteúdo não vazio
+                stack = self._detect_tech_stack(message)
+                content = self._generate_resume_template(stack)  # Garante conteúdo não vazio
                 return {"role": "assistant", "content": content or "Modelo não disponível"}
             
             elif intent == "SALARIO":
