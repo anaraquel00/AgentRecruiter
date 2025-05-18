@@ -45,6 +45,8 @@ class CareerAgent:
             "LinkedIn": "https://api.linkedin.com/v3/jobs",
             "Indeed": "https://api.indeed.com/ads/apisearch"
         }
+        print(f"🔑 OpenAI key: {self.openai_key[:5]}...")  # Mostra os primeiros chars
+        print(f"📂 Banco criado em: {db_path}")
 
     def _seed_database(self):
         cursor = self.conn.cursor()
