@@ -36,8 +36,8 @@ class CareerAgent:
             raise ValueError("Configure HF_TOKEN nas variáveis de ambiente")
 
         def _init_hf_client(self):
-        """Client com timeouts e reconexão"""
-        return InferenceClient(
+            """Client com timeouts e reconexão"""
+            return InferenceClient(
             model="HuggingFaceH4/zephyr-7b-beta",
             token=self.hf_token,
             timeout=15.0  # Timeout para evitar loops
