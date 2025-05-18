@@ -1,8 +1,15 @@
 from career_agent import CareerAgent
 import gradio as gr
+    
 
 def create_interface():
-    agent = CareerAgent()
+    try:
+        agent = CareerAgent()
+        logger.info("✅ Agente inicializado com sucesso!")
+        # ... restante do código
+    except Exception as e:
+        logger.error(f"Falha na inicialização: {str(e)}")
+        raise
     
     with gr.Blocks(title="🚀 Mentor de Carreiras Tech") as app:
         gr.Markdown("# 🤖 Mentor de Carreiras Tech")
