@@ -117,15 +117,14 @@ class CareerAgent:
             Dict no formato {role: "assistant", content: "texto"}
         """
         try:
-        # ... lógica existente ...
-        return {
+            if intent == "VAGAS":
+                return {
             "role": "assistant",
             "content": resposta,
-            # Adicione isto para compatibilidade total
             "type": "messages"  # ← Nova linha crítica!
         }
-        except Exception as e:
-        return {
+            except Exception as e:
+                return {
             "role": "assistant",
             "content": f"Erro: {str(e)}",
             "type": "messages"
