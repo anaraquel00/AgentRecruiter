@@ -86,10 +86,10 @@ class CareerAgent:
             else:
                 return {"role": "assistant", "content": self._general_response() or "Como posso ajudar?"}
             
-    except (httpx.ReadTimeout, httpx.ConnectError) as e:
-        logger.warning(f"Timeout na API: {str(e)}")
-        fallback = self._local_fallback(message)  # <- 4 espaços
-        return {"role": "assistant", "content": fallback if fallback else "Sistema temporariamente indisponível"}  
+        except (httpx.ReadTimeout, httpx.ConnectError) as e:
+            logger.warning(f"Timeout na API: {str(e)}")
+            fallback = self._local_fallback(message)  
+            return {"role": "assistant", "content": fallback if fallback else "Sistema temporariamente indisponível"}  
     
     def safe_respond(self, message: str, history: List[List[str]]) -> Dict[str, str]:
         """Entry point seguro com validação completa"""
