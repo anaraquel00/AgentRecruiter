@@ -15,6 +15,7 @@ class CareerAgent:
 
         # No Hugging Face, use o diretório temporário
         db_path = os.path.join(gettempdir(), "jobs.db")
+        os.makedirs(os.path.dirname(db_path), exist_ok=True)
         self.conn = sqlite3.connect(db_path)
         self._create_jobs_table()
         
@@ -23,7 +24,7 @@ class CareerAgent:
             self._seed_database()
         
         # Conecta ao banco de vagas (simulado)
-        self.conn = sqlite3.connect("database/jobs.db")
+        
         self._create_jobs_table()
         
         # Definindo atributos faltantes
@@ -46,15 +47,15 @@ class CareerAgent:
         }
 
     def _seed_database(self):
-     cursor = self.conn.cursor()
-     cursor.executemany(
-        "INSERT INTO vagas VALUES (?, ?, ?, ?, ?, ?)",
-        [
+        cursor = self.conn.cursor()
+        cursor.executemany(  # <-- Alinhar com cursor
+           "INSERT INTO vagas VALUES (?, ?, ?, ?, ?, ?)",
+           [
             (1, "Desenvolvedor Python", "Empresa X", "Python/Django", "R$ 8.000", "https://exemplo.com/vaga1"),
             (2, "Engenheiro de Dados", "Empresa Y", "Python/SQL", "R$ 12.000", "https://exemplo.com/vaga2")
-        ]
-    )
-     self.conn.commit()    
+           ]
+        )
+        self.conn.commit()    
         
     def _create_jobs_table(self):
         cursor = self.conn.cursor()
