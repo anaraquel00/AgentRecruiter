@@ -80,16 +80,16 @@ class CareerAgent:
                 return {"role": "assistant", "content": content or "Modelo não disponível"}
             
             elif intent == "SALARIO":
-            content = self._get_salary_info()
+                content = self._get_salary_info()
                 return {"role": "assistant", "content": content or "Informações salariais indisponíveis"}
             
             else:
                 return {"role": "assistant", "content": self._general_response() or "Como posso ajudar?"}
             
         except (httpx.ReadTimeout, httpx.ConnectError) as e:  # Corrigido o tipo de exceção
-        logger.warning(f"Timeout na API: {str(e)}")
-        fallback = self._local_fallback(message)
-            return {"role": "assistant", "content": fallback if fallback else "Sistema temporariamente indisponível"}
+            logger.warning(f"Timeout na API: {str(e)}")
+            fallback = self._local_fallback(message)
+                return {"role": "assistant", "content": fallback if fallback else "Sistema temporariamente indisponível"}
     
     def safe_respond(self, message: str, history: List[List[str]]) -> Dict[str, str]:
         """Entry point seguro com validação completa"""
@@ -135,7 +135,7 @@ class CareerAgent:
         """Respostas locais pré-definidas"""
         if any(kw in message for kw in ["currículo", "cv"]):
             return "📄 Modelo de currículo:\n- Habilidades técnicas\n- Experiência profissional"
-        return "Como posso ajudar com sua carreira tech?"
+            return "Como posso ajudar com sua carreira tech?"
 
     
     def _seed_database(self):
