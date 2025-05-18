@@ -11,10 +11,10 @@ logger = logging.getLogger(__name__)
 
 class CareerAgent:
     def _init_db(self):
-    os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
-    self.conn = sqlite3.connect(self.db_path)
-    cursor = self.conn.cursor()
-    cursor.execute("""
+        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+        self.conn = sqlite3.connect(self.db_path)
+        cursor = self.conn.cursor()
+        cursor.execute("""
         CREATE TABLE IF NOT EXISTS jobs (
             id INTEGER PRIMARY KEY,
             title TEXT,
@@ -23,8 +23,8 @@ class CareerAgent:
             salary TEXT,   
             link TEXT      
         )
-    """)
-    self.conn.commit()
+        """)
+        self.conn.commit()
 
     def _validate_hf_token(self):
         token = os.getenv("HF_TOKEN")
