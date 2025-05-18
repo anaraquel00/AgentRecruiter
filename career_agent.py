@@ -1,75 +1,61 @@
-
 import os
 import sqlite3
 import logging
-import time
 from typing import Dict, List
-from functools import lru_cache
-from huggingface_hub import InferenceClient, InferenceTimeoutError
+from huggingface_hub import InferenceClient
 
 logger = logging.getLogger(__name__)
 
 class CareerAgent:
     def __init__(self):
-        # 1. Defina db_path ANTES de chamar _init_db
+        # 1. Inicialize TODOS os atributos primeiro
+        self.hf_token = None  # ← Inicialização explícita
         self.db_path = os.path.join("/tmp", "career_agent.db")
+        self.client = None
+        self.conn = None
+        self.tech_stacks = {}
         
-        # 2. Inicialize componentes na ordem correta
-        self._validate_hf_token()
-        self._init_client()
-        self._load_tech_stacks()
-        self._init_db()  # Agora db_path já está definido
+        # 2. Ordem correta de inicialização
+        self._validate_and_set_hf_token()  # Define self.hf_token
+        self._init_client()                # Usa self.hf_token
+        self._init_tech_stacks()           # Dados locais
+        self._init_db()                    # Banco de dados
+
+    def _validate_and_set_hf_token(self):
+        """Valida e define o token corretamente"""
+        token = os.getenv("HF_TOKEN")
+        if not token or not token.startswith("hf_"):
+            raise ValueError("HF_TOKEN inválido ou ausente!")
+        self.hf_token = token  # ← Atribuição correta
+
+    def _init_client(self):
+        """Configuração segura do cliente"""
+        self.client = InferenceClient(
+            model="HuggingFaceH4/zephyr-7b-beta",
+            token=self.hf_token,
+            timeout=10
+        )
 
     def _init_db(self):
-        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
-        self.conn = sqlite3.connect(self.db_path)
-        cursor = self.conn.cursor()
-        
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS jobs (
-            id INTEGER PRIMARY KEY,
-            title TEXT,
-            company TEXT,
-            skills TEXT,
-            salary TEXT,
-            link TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-        """)
+        """Inicialização robusta do banco"""
+        try:
+            os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+            self.conn = sqlite3.connect(self.db_path)
+            cursor = self.conn.cursor()
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS jobs (
+                    id INTEGER PRIMARY KEY,
+                    title TEXT
+                )
+            """)
+            self.conn.commit()
+        except Exception as e:
+            logger.error(f"Erro DB: {str(e)}")
+            raise
         
         if cursor.execute("SELECT COUNT(*) FROM jobs").fetchone()[0] == 0:
             self._seed_database()
-        self.conn.commit()    
-
-    def _validate_hf_token(self) -> str:
-        """Validação rigorosa do token"""
-        token = os.getenv("HF_TOKEN")
-        if not token or not token.startswith("hf_"):
-            logger.error("Token HF inválido!")
-            raise ValueError("Configure HF_TOKEN válido nas variáveis de ambiente")
-        return token
-
-    def _init_client(self):
-        """Client com timeout e reconexão"""
-        return InferenceClient(
-            model="HuggingFaceH4/zephyr-7b-beta",
-            token=self.hf_token,
-            timeout=10.0
-        )
-
-    def safe_respond(self, message: str, history: List[List[str]]) -> Dict[str, str]:
-        """Entry point seguro com validação completa"""
-        try:
-            # Validação de entrada
-            if not isinstance(message, str) or len(message.strip()) < 2:
-                return {"role": "assistant", "content": "Por favor, formule melhor sua pergunta"}
-            
-            # Circuit breaker
-            return self._process_message(message.lower())
-            
-        except Exception as e:
-            logger.error(f"Erro crítico: {str(e)}")
-            return {"role": "assistant", "content": "Sistema temporariamente indisponível"}
+        self.conn.commit() 
 
     def _process_message(self, message: str) -> Dict[str, str]:
         """Fluxo principal com fallback local"""
@@ -88,7 +74,21 @@ class CareerAgent:
                 
         except InferenceTimeoutError:
             logger.warning("Timeout na API, usando fallback")
-            return {"role": "assistant", "content": self._local_fallback(message)}
+            return {"role": "assistant", "content": self._local_fallback(message)}    
+
+    def safe_respond(self, message: str, history: List[List[str]]) -> Dict[str, str]:
+        """Entry point seguro com validação completa"""
+        try:
+            # Validação de entrada
+            if not isinstance(message, str) or len(message.strip()) < 2:
+                return {"role": "assistant", "content": "Por favor, formule melhor sua pergunta"}
+            
+            # Circuit breaker
+            return self._process_message(message.lower())
+            
+        except Exception as e:
+            logger.error(f"Erro crítico: {str(e)}")
+            return {"role": "assistant", "content": "Sistema temporariamente indisponível"}
 
     @lru_cache(maxsize=100)
     def _classify_intent(self, message: str) -> str:
