@@ -91,8 +91,8 @@ class CareerAgent:
             return response.choices[0].message.content
             
         except Exception as e:
-            logger.error(f"Erro na API: {str(e)}", exc_info=True)
-            return self._local_fallback(prompt)
+        logger.error(f"Erro grave: {str(e)}")
+            return ""
 
 
     def _local_fallback(self, prompt: str) -> str:
@@ -107,7 +107,7 @@ class CareerAgent:
         else:
             return "🔧 Estou com limitações temporárias. Reformule sua pergunta."
 
-    def enhanced_respond(self, message: str, history: List[List[str]]) -> Dict[str, str]:
+    def enhanced_respond(self, message: str, history: list) -> dict:
         """
         Processa a mensagem do usuário e retorna uma resposta formatada
         Args:
@@ -117,35 +117,19 @@ class CareerAgent:
             Dict no formato {role: "assistant", content: "texto"}
         """
         try:
-            # Classificação de intenção
-            intent = self._classify_intent(message)
-            
-            # Roteamento baseado em intenção
-            if intent == "VAGAS":
-                jobs = self._get_jobs_from_db(message)
-                return {
-                    "role": "assistant",
-                    "content": self._format_jobs(jobs)
-                }
-            elif intent == "CURRICULO":
-                return {
-                    "role": "assistant",
-                    "content": self._generate_resume_template(self._detect_tech_stack(message))
-                }
-            else:
-                return {
-                    "role": "assistant",
-                    "content": "Como posso ajudar sua carreira tech hoje?"
-                }
-                
+        # ... lógica existente ...
+        return {
+            "role": "assistant",
+            "content": resposta,
+            # Adicione isto para compatibilidade total
+            "type": "messages"  # ← Nova linha crítica!
+        }
         except Exception as e:
-            print(f"⛔ Erro no enhanced_respond: {str(e)}")
-            return {
-                "role": "assistant",
-                "content": self._local_fallback(message)
-            }
-
-    # ... (métodos auxiliares omitidos por brevidade)
+        return {
+            "role": "assistant",
+            "content": f"Erro: {str(e)}",
+            "type": "messages"
+        }
 
     def _classify_intent(self, message: str) -> str:
         """Classifica a intenção usando o modelo LLM"""
