@@ -9,30 +9,31 @@ logger = logging.getLogger(__name__)
 
 def create_interface():
     try:
-        logger.info("Inicializando CareerAgent...")
+        logger.info("🚀 Iniciando inicialização...")
         agent = CareerAgent()
-        logger.info("✅ Agente inicializado com sucesso!")
         
-        with gr.Blocks(title="🚀 Mentor Tech") as app:
-            gr.Markdown("# 🤖 Mentor de Carreiras em TI")
+        with gr.Blocks(title="🤖 Mentor Tech") as app:
+            gr.Markdown("# 🚀 Mentor de Carreiras em Tecnologia")
             
-            gr.ChatInterface(
+            # Interface simplificada e compatível
+            chatbot = gr.ChatInterface(
                 fn=agent.enhanced_respond,
                 examples=[
                     "Como criar um currículo para Python?",
                     "Quero um plano de carreira em Frontend"
-                ],
-                retry_btn=None
+                ]
             )
             
-            gr.Markdown("### 💡 Dicas:\n- Pergunte sobre salários\n- Peça análise de currículo")
+            gr.Markdown("### 💡 Dicas: Pergunte sobre vagas, salários ou planos de carreira")
         
+        logger.info("✅ Interface construída com sucesso!")
         return app
         
     except Exception as e:
-        logger.error(f"⛔ Falha crítica: {str(e)}", exc_info=True)
-        return gr.Blocks()  # Fallback seguro
+        logger.critical(f"⛔ Falha crítica: {str(e)}")
+        # Fallback seguro
+        return gr.Blocks().launch(server_name="0.0.0.0", server_port=7860)
 
 if __name__ == "__main__":
     app = create_interface()
-    app.launch(server_name="0.0.0.0", server_port=7860)
+    app.launch()
