@@ -1,6 +1,7 @@
 from tempfile import gettempdir
 import gradio as gr # type: ignore
 import random
+from typing import List, Dict
 from datetime import datetime
 import openai # type: ignore
 import sqlite3
@@ -87,7 +88,7 @@ class CareerAgent:
         cursor.execute("SELECT * FROM vagas WHERE stack LIKE ?", (f"%{stack}%",))
         return cursor.fetchall()
 
-    def enhanced_respond(self, message, history):
+    def enhanced_respond(self, message: str, history: List[List[str]]) -> Dict[str, str]:
         gpt_prompt = f"""
         Analise esta mensagem e classifique a intenção:
         "{message}"
@@ -101,20 +102,17 @@ class CareerAgent:
         - OUTROS
         Retorne apenas o tipo em MAIÚSCULAS.
         """
-        intent = self._query_gpt4(gpt_prompt).strip()
+        intent = self._detect_intent(message)
+        return self._handle_intent(intent, message)
 
         if intent == "VAGAS":
-            stack = self._query_gpt4(f"Extraia a stack tech desta mensagem: '{message}'")
-            jobs = self.get_real_jobs(stack)
-            return self._format_jobs(jobs)
-        elif intent == "PLANO_CARREIRA":
-            return self.generate_career_roadmap(message)
-        elif intent == "CURRICULO":
-            return self.generate_custom_resume(message)
-        elif intent == "CARTA":
-            return self.generate_cover_letter(message)
+            return {
+            "role": "assistant", 
+            "content": self._format_jobs(jobs),
+            "links": [job[5] for job in jobs]  # Opcional para rich content
+        }
         else:
-            return {"role": "assistant", "content": resposta}
+            return {"role": "assistant", "content": "Como posso ajudar?"}
     
     def _format_jobs(self, jobs):
         return "\n".join(
