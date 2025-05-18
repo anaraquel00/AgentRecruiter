@@ -91,7 +91,7 @@ class CareerAgent:
             return response.choices[0].message.content
             
         except Exception as e:
-        logger.error(f"Erro grave: {str(e)}")
+            logger.error(f"Erro grave: {str(e)}")
             return ""
 
 
