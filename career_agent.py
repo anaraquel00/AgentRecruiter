@@ -11,14 +11,35 @@ logger = logging.getLogger(__name__)
 
 class CareerAgent:
     def __init__(self):
-        """Configuração robusta com circuit breaker pattern"""
-        self.hf_token = self._validate_hf_token()
-        self.client = self._init_client()
-        self.tech_stacks = {
-            "Frontend": {"skills": ["React", "TypeScript"], "salary": "R$ 4k-12k"},
-            "Backend": {"skills": ["Python", "Node.js"], "salary": "R$ 5k-15k"}
-        }
-        self._init_db()
+        # 1. Defina db_path ANTES de chamar _init_db
+        self.db_path = os.path.join("/tmp", "career_agent.db")
+        
+        # 2. Inicialize componentes na ordem correta
+        self._validate_hf_token()
+        self._init_client()
+        self._load_tech_stacks()
+        self._init_db()  # Agora db_path já está definido
+
+    def _init_db(self):
+        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+        self.conn = sqlite3.connect(self.db_path)
+        cursor = self.conn.cursor()
+        
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS jobs (
+            id INTEGER PRIMARY KEY,
+            title TEXT,
+            company TEXT,
+            skills TEXT,
+            salary TEXT,
+            link TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """)
+        
+        if cursor.execute("SELECT COUNT(*) FROM jobs").fetchone()[0] == 0:
+            self._seed_database()
+        self.conn.commit()    
 
     def _validate_hf_token(self) -> str:
         """Validação rigorosa do token"""
@@ -89,27 +110,7 @@ class CareerAgent:
             return "📄 Modelo de currículo:\n- Habilidades técnicas\n- Experiência profissional"
         return "Como posso ajudar com sua carreira tech?"
 
-    def _init_db(self):
-        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
-        self.conn = sqlite3.connect(self.db_path)
-        cursor = self.conn.cursor()
-        
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS jobs (
-            id INTEGER PRIMARY KEY,
-            title TEXT,
-            company TEXT,
-            skills TEXT,
-            salary TEXT,
-            link TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-        """)
-        
-        if cursor.execute("SELECT COUNT(*) FROM jobs").fetchone()[0] == 0:
-            self._seed_database()
-        self.conn.commit()
-
+    
     def _seed_database(self):
         jobs = [
             (1, "Desenvolvedor Frontend", "Tech Solutions", "React/TypeScript", "R$ 8.000", "https://exemplo.com/vaga1"),
