@@ -112,7 +112,7 @@ class CareerAgent:
         elif intent == "CARTA":
             return self.generate_cover_letter(message)
         else:
-            return "Como posso ajudar com sua carreira tech? (currículo, plano, vagas)"
+            return {"role": "assistant", "content": resposta}
     
     def _format_jobs(self, jobs):
         return "\n".join(
