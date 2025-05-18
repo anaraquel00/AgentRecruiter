@@ -1,7 +1,7 @@
 import gradio as gr
 import logging
 import os
-import CareerAgent from career_agent 
+from career_agent import CareerAgent
 
 def create_interface():
     try:
