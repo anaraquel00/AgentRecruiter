@@ -121,10 +121,11 @@ class CareerAgent:
                 return {
             "role": "assistant",
             "content": resposta,
-            "type": "messages"  # ← Nova linha crítica!
+            "type": "messages"  
         }
-            except Exception as e:
-                return {
+                
+        except Exception as e:
+            return {
             "role": "assistant",
             "content": f"Erro: {str(e)}",
             "type": "messages"
