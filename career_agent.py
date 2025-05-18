@@ -1,23 +1,30 @@
 import os
 import sqlite3
 import logging
-from typing import Dict, List
+from typing import Dict, List, Optional  
+import httpx  
+from httpx import Timeout  
 from functools import lru_cache
 from huggingface_hub import InferenceClient
 
 logger = logging.getLogger(__name__)
 
 class CareerAgent:
-    def __init__(self):
-        self.hf_token = self._validate_hf_token()
-        self.db_path = os.path.join("/tmp", "career_agent.db")
-        self.client = InferenceClient(
-            model="HuggingFaceH4/zephyr-7b-beta",
-            token=self.hf_token,
-            timeout=10
+    def _init_db(self):
+    os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+    self.conn = sqlite3.connect(self.db_path)
+    cursor = self.conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS jobs (
+            id INTEGER PRIMARY KEY,
+            title TEXT,
+            company TEXT,  
+            skills TEXT,   
+            salary TEXT,   
+            link TEXT      
         )
-        self._init_tech_stacks()  
-        self._init_db()
+    """)
+    self.conn.commit()
 
     def _validate_hf_token(self):
         token = os.getenv("HF_TOKEN")
@@ -25,11 +32,7 @@ class CareerAgent:
             raise ValueError("HF_TOKEN inválido ou ausente!")
         return token
 
-    def _init_tech_stacks(self):  
-        self.tech_stacks = {
-            "Frontend": {"skills": ["React", "TypeScript"], "salary": "R$ 4k-12k"},
-            "Backend": {"skills": ["Python", "Node.js"], "salary": "R$ 5k-15k"}
-        }
+    
     
     def _init_client(self):
         """Configuração segura do cliente"""
@@ -51,25 +54,43 @@ class CareerAgent:
         """)
         self.conn.commit()
 
+    def _detect_tech_stack(self, message: str) -> str:
+    """Detecta a stack tecnológica mencionada na mensagem"""
+    message_lower = message.lower()
+    if any(kw in message_lower for kw in ["front", "react", "javascript"]):
+        return "Frontend"
+    elif any(kw in message_lower for kw in ["back", "python", "node"]):
+        return "Backend"
+    return "Fullstack"
+
+    def _init_tech_stacks(self):  
+        self.tech_stacks = {
+            "Frontend": {"skills": ["React", "TypeScript"], "salary": "R$ 4k-12k"},
+            "Backend": {"skills": ["Python", "Node.js"], "salary": "R$ 5k-15k"}
+        }
+    
     def _process_message(self, message: str) -> Dict[str, str]:
         """Fluxo principal com fallback local"""
         try:
             intent = self._classify_intent(message)
-            
+        
             if intent == "CURRICULO":
-                stack = self._detect_tech_stack(message)
-                return self._generate_resume(stack)
-                
+            stack = self._detect_tech_stack(message)
+            content = self._generate_resume_template(stack)  # Garante conteúdo não vazio
+                return {"role": "assistant", "content": content or "Modelo não disponível"}
+            
             elif intent == "SALARIO":
-                return {"role": "assistant", "content": self._get_salary_info()}
-                
+            content = self._get_salary_info()
+                return {"role": "assistant", "content": content or "Informações salariais indisponíveis"}
+            
             else:
-                return {"role": "assistant", "content": self._general_response()}
-                
-        except InferenceTimeoutError:
-            logger.warning("Timeout na API, usando fallback")
-            return {"role": "assistant", "content": self._local_fallback(message)}    
-
+                return {"role": "assistant", "content": self._general_response() or "Como posso ajudar?"}
+            
+        except (httpx.ReadTimeout, httpx.ConnectError) as e:  # Corrigido o tipo de exceção
+        logger.warning(f"Timeout na API: {str(e)}")
+        fallback = self._local_fallback(message)
+            return {"role": "assistant", "content": fallback if fallback else "Sistema temporariamente indisponível"}
+    
     def safe_respond(self, message: str, history: List[List[str]]) -> Dict[str, str]:
         """Entry point seguro com validação completa"""
         try:
@@ -83,6 +104,18 @@ class CareerAgent:
         except Exception as e:
             logger.error(f"Erro crítico: {str(e)}")
             return {"role": "assistant", "content": "Sistema temporariamente indisponível"}
+
+    def _get_salary_info(self) -> str:
+        """Retorna informações salariais formatadas"""
+        salaries = [f"{stack}: {data['salary']}" for stack, data in self.tech_stacks.items()]
+        return " | ".join(salaries) if salaries else ""
+
+    def _general_response(self) -> str:
+        """Resposta padrão para intenções não reconhecidas"""
+        return ("Posso ajudar com:\n"
+            "- Modelos de currículo\n"
+            "- Informações salariais\n"
+            "- Dicas de carreira")
 
     @lru_cache(maxsize=100)
     def _classify_intent(self, message: str) -> str:
