@@ -20,7 +20,6 @@ class CareerAgent:
         
         self.client = self._init_client()
         self._init_tech_stacks()
-        self._seed_database()
         logger.info("CareerAgent inicializado com sucesso!")
 
     def _get_conn(self):
@@ -60,41 +59,24 @@ class CareerAgent:
         return conn
 
     def _init_db_once(self):
-        """Executado apenas uma vez na thread principal"""
+        """Executado apenas na thread principal"""
         conn = sqlite3.connect(self.db_path)
         try:
             cursor = conn.cursor()
-            
-            # Forçar recriação da tabela
             cursor.execute("DROP TABLE IF EXISTS jobs")
-            
-            # Schema com verificação de hash
-            schema = """
-            CREATE TABLE jobs (
-                id INTEGER PRIMARY KEY,
-                title TEXT NOT NULL CHECK(length(title) <= 100),
-                company TEXT NOT NULL CHECK(length(company) <= 50),
-                skills TEXT CHECK(length(skills) <= 200),
-                salary TEXT CHECK(length(salary) <= 20),
-                link TEXT CHECK(link LIKE 'http%')
-            )"""
-            cursor.execute(schema)
-            
-            # Verificação pós-criação
-            cursor.execute("PRAGMA table_info(jobs)")
-            columns = {col[1]: col for col in cursor.fetchall()}
-            required_columns = ['id', 'title', 'company', 'skills', 'salary', 'link']
-            
-            if not all(col in columns for col in required_columns):
-                logger.critical("Schema corrompido! Colunas faltantes:")
-                for col in required_columns:
-                    if col not in columns:
-                        logger.critical(f" - {col}")
-                raise RuntimeError("Erro fatal na criação do banco")
-
-            self._seed_initial_data(conn)  
+            cursor.execute("""
+                CREATE TABLE jobs (
+                    id INTEGER PRIMARY KEY,
+                    title TEXT NOT NULL,
+                    company TEXT NOT NULL,
+                    skills TEXT,
+                    salary TEXT,
+                    link TEXT
+                )
+            """)
+            self._seed_initial_data(conn)  # ← Seed acontece aqui
         finally:
-            conn.close()    
+            conn.close()  
 
     def _clean_database(self):
         """Remove completamente o banco de dados existente"""
@@ -397,7 +379,7 @@ class CareerAgent:
         return "🌟 Conte-me mais sobre seus objetivos profissionais!"
 
     
-    def _seed_initial_data(self, conn):  # ← Recebe conn como parâmetro
+    def _seed_initial_data(self, conn):  
         try:
             cursor = conn.cursor()
             
@@ -414,16 +396,12 @@ class CareerAgent:
                 jobs
             )
             conn.commit()
-            print("Dados inseridos com sucesso")
-           
-            
-        except sqlite3.OperationalError as e:
-            print(f"FALHA CRÍTICA NO SCHEMA: {str(e)}")
-            print("Estrutura atual da tabela:")
-            cursor.execute("PRAGMA table_info(jobs)")
-            for col in cursor.fetchall():
-                print(f"Coluna {col[1]} ({col[2]})")
-            raise RuntimeError("Problema de compatibilidade no banco de dados") from e
+            logger.info("Dados iniciais inseridos com sucesso!")
+                      
+        except Exception as e:
+            logger.error(f"Falha ao inserir dados: {str(e)}")
+            raise    
+        
     
     @lru_cache(maxsize=100)
     def _query_llm(self, prompt: str) -> str:
