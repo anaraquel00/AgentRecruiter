@@ -367,8 +367,9 @@ class CareerAgent:
         except Exception as e:
             logger.error(f"Erro na classificação: {str(e)}")
             return "OUTROS"  
-                conn = self._get_conn()
-                cursor = conn.cursor() 
+            
+            conn = self._get_conn()
+            cursor = conn.cursor() 
                 
                 query = """
                     SELECT title, company, skills, salary, link 
@@ -387,8 +388,8 @@ class CareerAgent:
                     for row in cursor.fetchall()
             ]    
         
-        print(f"[DEBUG] Mensagem: '{message}'")
-        print(f"[DEBUG] Intenção detectada: {intent}")
+            print(f"[DEBUG] Mensagem: '{message}'")
+            print(f"[DEBUG] Intenção detectada: {intent}")
         
             return intent        
             
