@@ -333,10 +333,10 @@ class CareerAgent:
         }
         
             for intent, keywords in keyword_map.items():
-            if any(kw in cleaned_msg for kw in keywords):
-                logger.debug(f"Intenção detectada via keywords: {intent}")
-                return intent
-        
+                if any(kw in cleaned_msg for kw in keywords):
+                    logger.debug(f"Intenção detectada via keywords: {intent}")
+                    return intent
+            
         # Se não encontrou, usa o LLM para classificação refinada
         try:
             prompt = f"""Analise esta mensagem e classifique a intenção:
