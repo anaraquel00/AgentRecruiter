@@ -3,6 +3,7 @@ import sqlite3
 import glob
 import logging
 import httpx
+import threading
 from huggingface_hub import InferenceClient
 from functools import lru_cache
 from typing import Dict, List, Optional
