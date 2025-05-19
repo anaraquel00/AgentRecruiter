@@ -11,34 +11,44 @@ logger = logging.getLogger(__name__)
 
 class CareerAgent:
     def __init__(self):
+        self._clean_database() 
         self.hf_token = self._validate_hf_token()
         self.db_path = os.path.join("/tmp", "career_agent.db")
         self._init_db()
-        # Primeiro inicialize o client
-        self.client = self._init_client()  # <--- Linha crítica
-        
-        # Depois os demais componentes
+        self.client = self._init_client()  
         self._init_tech_stacks()
         self._seed_database()
+
+    def _clean_database(self):
+        """Remove completamente o banco de dados existente"""
+        db_path = os.path.join("/tmp", "career_agent.db")
+        if os.path.exists(db_path):
+            os.remove(db_path)
+            print(f"Banco de dados antigo removido: {db_path}")    
         
     def _init_db(self):
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
         self.conn = sqlite3.connect(self.db_path)
         cursor = self.conn.cursor()
         
-        # Forçar a criação da tabela com a nova estrutura
-        cursor.execute("DROP TABLE IF EXISTS jobs")
-        cursor.execute("""
-            CREATE TABLE jobs (
-                id INTEGER PRIMARY KEY,
-                title TEXT NOT NULL,
-                company TEXT NOT NULL,
-                skills TEXT,
-                salary TEXT,
-                link TEXT
-            )
-        """)
-        self.conn.commit()
+        cursor.execute("PRAGMA user_version")
+        version = cursor.fetchone()[0] or 0
+        
+        if version < 1:  # Altere este número ao atualizar o schema
+            cursor.execute("DROP TABLE IF EXISTS jobs")
+            cursor.execute("""
+                CREATE TABLE jobs (
+                    id INTEGER PRIMARY KEY,
+                    title TEXT,
+                    company TEXT,
+                    skills TEXT,
+                    salary TEXT,
+                    link TEXT
+                )
+            """)
+            cursor.execute("PRAGMA user_version = 1")  # Atualiza versão
+            self.conn.commit()
+            print("Schema do banco criado/atualizado")
 
     def _validate_hf_token(self):
         token = os.getenv("HF_TOKEN")
@@ -281,17 +291,31 @@ class CareerAgent:
 
     
     def _seed_database(self):
-        jobs = [
-            (1, "Desenvolvedor Frontend", "Tech Solutions", "React/TypeScript", "R$ 8.000", "https://exemplo.com/vaga1"),
-            (2, "Engenheiro de Dados", "Data Corp", "Python/SQL", "R$ 12.000", "https://exemplo.com/vaga2")
-        ]
-        
-        cursor = self.conn.cursor()
-        cursor.executemany(
-            "INSERT INTO jobs (id, title, company, skills, salary, link) VALUES (?, ?, ?, ?, ?, ?)",
-            jobs
-        )
-        self.conn.commit()
+        try:
+            cursor = self.conn.cursor()
+            
+            # Verificação final antes da inserção
+            cursor.execute("SELECT company FROM jobs LIMIT 1")
+            jobs = [
+                (1, "Desenvolvedor Frontend", "Tech Solutions", "React/TypeScript", "R$ 8.000", "https://exemplo.com/vaga1"),
+                (2, "Engenheiro de Dados", "Data Corp", "Python/SQL", "R$ 12.000", "https://exemplo.com/vaga2")
+            ]
+            
+            cursor = self.conn.cursor()
+            cursor.executemany(
+                "INSERT INTO jobs (id, title, company, skills, salary, link) VALUES (?, ?, ?, ?, ?, ?)",
+                jobs
+            )
+            self.conn.commit()
+             print("Dados inseridos com sucesso")
+            
+        except sqlite3.OperationalError as e:
+            print(f"FALHA CRÍTICA NO SCHEMA: {str(e)}")
+            print("Estrutura atual da tabela:")
+            cursor.execute("PRAGMA table_info(jobs)")
+            for col in cursor.fetchall():
+                print(f"Coluna {col[1]} ({col[2]})")
+            raise RuntimeError("Problema de compatibilidade no banco de dados") from e
     
     @lru_cache(maxsize=100)
     def _query_llm(self, prompt: str) -> str:
