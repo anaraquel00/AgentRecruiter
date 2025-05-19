@@ -14,12 +14,21 @@ class CareerAgent:
         self.db_path = os.path.abspath("/tmp/career_agent.db")  # Caminho absoluto
         self._nuke_database()
         self.hf_token = self._validate_hf_token()
-        self.conn = self._create_connection()
-        self._init_db()
+        self.local = threading.local()  
+        self._init_db_once() 
+        
         self.client = self._init_client()
         self._init_tech_stacks()
         self._seed_database()
         logger.info("CareerAgent inicializado com sucesso!")
+
+    def _get_conn(self):
+        """Retorna a conexão da thread atual"""
+        if not hasattr(self.local, "conn") or self.local.conn is None:
+            self.local.conn = sqlite3.connect(self.db_path, check_same_thread=False)
+            self.local.conn.execute("PRAGMA foreign_keys = 1")
+            self.local.conn.execute("PRAGMA journal_mode = WAL")
+        return self.local.conn    
 
     def _nuke_database(self):
         """Destruição total do banco com verificação em 3 níveis"""
@@ -49,10 +58,11 @@ class CareerAgent:
         conn.execute("PRAGMA synchronous = NORMAL")
         return conn
 
-    def _init_db(self):
-        """Criação da tabela com verificação quântica"""
-        with self.conn:
-            cursor = self.conn.cursor()
+    def _init_db_once(self):
+        """Executado apenas uma vez na thread principal"""
+        conn = sqlite3.connect(self.db_path)
+        try:
+            cursor = conn.cursor()
             
             # Forçar recriação da tabela
             cursor.execute("DROP TABLE IF EXISTS jobs")
@@ -80,6 +90,10 @@ class CareerAgent:
                     if col not in columns:
                         logger.critical(f" - {col}")
                 raise RuntimeError("Erro fatal na criação do banco")
+
+            self._seed_initial_data(conn)  
+        finally:
+            conn.close()    
 
     def _clean_database(self):
         """Remove completamente o banco de dados existente"""
@@ -295,7 +309,7 @@ class CareerAgent:
         )
 
     def _get_jobs(self, skill: str) -> List[Dict]:
-        cursor = self.conn.cursor()
+        conn = self._get_conn()
         cursor.execute("""
             SELECT title, company, skills, salary, link 
             FROM jobs 
@@ -382,9 +396,9 @@ class CareerAgent:
         return "🌟 Conte-me mais sobre seus objetivos profissionais!"
 
     
-    def _seed_database(self):
+    def _seed_initial_data(self, conn):  # ← Recebe conn como parâmetro
         try:
-            cursor = self.conn.cursor()
+            cursor = conn.cursor()
             
             # Verificação final antes da inserção
             cursor.execute("SELECT company FROM jobs LIMIT 1")
@@ -394,13 +408,13 @@ class CareerAgent:
                 (3, "Cientista de Dados", "AI Tech", "Python/Pandas", "R$ 15.000", "https://exemplo.com/vaga3")
             ]
             
-            cursor = self.conn.cursor()
             cursor.executemany(
                 "INSERT INTO jobs (id, title, company, skills, salary, link) VALUES (?, ?, ?, ?, ?, ?)",
                 jobs
             )
-            self.conn.commit()
+            conn.commit()
             print("Dados inseridos com sucesso")
+           
             
         except sqlite3.OperationalError as e:
             print(f"FALHA CRÍTICA NO SCHEMA: {str(e)}")
