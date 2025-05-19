@@ -98,7 +98,7 @@ class CareerAgent:
                 content = self._generate_resume_template(stack)
                 return {"role": "assistant", "content": content or "Modelo não disponível"}
                 
-            elif if intent == "SALARIO":
+            elif intent == "SALARIO":
                 stack = self._detect_tech_stack(message)
                 return {
                     "role": "assistant", 
