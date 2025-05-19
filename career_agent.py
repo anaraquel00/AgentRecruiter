@@ -293,27 +293,26 @@ class CareerAgent:
         )
 
     def _get_jobs(self, skill: str) -> List[Dict]:
-        try:
-            conn = self._get_conn()
-            cursor = conn.cursor() 
-            
-            query = """
-                SELECT title, company, skills, salary, link 
-                FROM jobs 
-                WHERE LOWER(skills) LIKE ? 
-                ORDER BY salary DESC
-            """
-            logger.debug(f"Executando query: {query}")  # <--- Log da query
-            logger.debug(f"Parâmetro: %{skill.lower()}%")  # <--- Log do parâmetro
-            
-            cursor.execute(query, (f"%{skill.lower()}%",))
-            
+        conn = self._get_conn()
+        cursor = conn.cursor()
+        
+        query = """
+            SELECT title, company, skills, salary, link 
+            FROM jobs 
+            WHERE LOWER(skills) LIKE ? 
+            ORDER BY salary DESC
+        """
+        logger.debug(f"Executando query: {query}")  # <--- Log da query
+        logger.debug(f"Parâmetro: %{skill.lower()}%")  # <--- Log do parâmetro
+        
+        cursor.execute(query, (f"%{skill.lower()}%",))
+                
             return [
-                {"title": row[0], "company": row[1], "skills": row[2], 
-                 "salary": row[3], "link": row[4]}
-                for row in cursor.fetchall()
-            ]    
-
+            {"title": row[0], "company": row[1], "skills": row[2], 
+            "salary": row[3], "link": row[4]}
+            for row in cursor.fetchall()
+            ]                    
+        
     @lru_cache(maxsize=100)
     def _classify_intent(self, message: str) -> str:
         """
@@ -366,7 +365,25 @@ class CareerAgent:
         except Exception as e:
             logger.error(f"Erro na classificação: {str(e)}")
             return "OUTROS"  
-
+conn = self._get_conn()
+                cursor = conn.cursor() 
+                
+                query = """
+                    SELECT title, company, skills, salary, link 
+                    FROM jobs 
+                    WHERE LOWER(skills) LIKE ? 
+                    ORDER BY salary DESC
+                """
+                logger.debug(f"Executando query: {query}")  # <--- Log da query
+                logger.debug(f"Parâmetro: %{skill.lower()}%")  # <--- Log do parâmetro
+                
+                cursor.execute(query, (f"%{skill.lower()}%",))
+                
+                return [
+                    {"title": row[0], "company": row[1], "skills": row[2], 
+                     "salary": row[3], "link": row[4]}
+                    for row in cursor.fetchall()
+                ]    
         print(f"[DEBUG] Mensagem: '{message}'")
         print(f"[DEBUG] Intenção detectada: {intent}")
         
