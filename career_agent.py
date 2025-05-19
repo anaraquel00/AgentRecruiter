@@ -108,7 +108,7 @@ class CareerAgent:
 
     def _detect_tech_stack(self, message: str) -> str:
         message_lower = message.lower()
-        logger.debug(f"Detectando stack para mensagem: {message_lower}")
+        logger.debug(f"Detectando stack para: '{message_lower}'")
         
         stack_keywords = {
             "Frontend": ["frontend", "front-end", "react", "javascript", "angular"],
@@ -118,11 +118,11 @@ class CareerAgent:
         
         for stack, keywords in stack_keywords.items():
             if any(kw in message_lower for kw in keywords):
-                print(f"[DEBUG] Stack detectada: {stack}")  
+                logger.debug(f"Stack detectada: {stack}")
                 return stack
                 
-        print(f"[DEBUG] Stack não detectada, usando 'Geral'")
-        return "Geral"  
+        logger.debug("Stack não detectada, usando 'Geral'")
+        return "Geral" 
 
     def _init_tech_stacks(self):  
         self.tech_stacks = {
@@ -259,18 +259,27 @@ class CareerAgent:
 
     def _get_requirements(self, stack: str) -> str:  
         stack_data = self.tech_stacks.get(stack, {})  
-        if not stack_data:  
-            return "⚠️ Stack não reconhecida. Escolha entre: Frontend, Backend ou Data Science."  
+        
+        # Verifica se a stack existe e tem dados
+        if not stack_data:
+            logger.error(f"Stack {stack} não encontrada no tech_stacks!")
+            return "⚠️ Stack não reconhecida."
+            
+        # Garante que 'skills' e 'dicas' existem
+        skills = stack_data.get("skills", [])
+        dicas = stack_data.get("dicas", [])
+        
+        # Log dos dados encontrados
+        logger.debug(f"Dados para {stack}: skills={skills}, dicas={dicas}")
     
+        # Constrói a resposta
         response = (
-            f"📚 **Pré-requisitos para {stack}**\n"
-            f"🛠️ Habilidades Técnicas:\n"
-            f"- {', '.join(stack_data.get('skills', []))}\n"  
-            f"🚀 Dicas de Estudo:\n"
-            f"- {', '.join (stack_data.get('dicas', []))}\n"  
-            f"💡 **Dica Bônus:** Pratique projetos reais e contribua em open-source!"
+            f"📚 **Pré-requisitos para {stack}**\n\n"
+            f"🛠️ Habilidades Técnicas:\n- {', '.join(skills)}\n\n"
+            f"🚀 Dicas de Estudo:\n- {'\n- '.join(dicas)}\n\n"
+            f"💡 **Dica Bônus:** Pratique projetos reais!"
         )
-        return response  
+        return response 
 
     def _general_response(self) -> str:
         """Respostas personalizadas"""
@@ -306,6 +315,7 @@ class CareerAgent:
         """
         # Limpeza básica da mensagem
         cleaned_msg = message.lower().strip()
+        logger.debug(f"Classificando intenção para mensagem: '{cleaned_msg}'")
         
         # Fallback rápido para mensagens muito curtas
         if len(cleaned_msg) < 3:
@@ -320,10 +330,10 @@ class CareerAgent:
             "PLANO": ["plano", "carreira", "progressão", "trajetória", "objetivo"]
         }
         
-        # Primeiro verifica por palavras-chave locais (rápido)
         for intent, keywords in keyword_map.items():
-            if any(keyword in cleaned_msg for keyword in keywords):
-                return intent
+        if any(kw in cleaned_msg for kw in keywords):
+            logger.debug(f"Intenção detectada via keywords: {intent}")
+            return intent
         
         # Se não encontrou, usa o LLM para classificação refinada
         try:
