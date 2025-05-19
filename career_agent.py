@@ -58,16 +58,18 @@ class CareerAgent:
         message_lower = message.lower()
         
         stack_keywords = {
-            "Frontend": ["front", "react", "javascript", "angular", "css"],
+            "Frontend": ["frontend", "front-end", "react", "javascript", "angular"],
             "Backend": ["back", "python", "java", "node", "api", "servidor"],
             "Data Science": ["dados", "data", "analista", "machine learning", "bi"]
         }
         
         for stack, keywords in stack_keywords.items():
             if any(kw in message_lower for kw in keywords):
+                print(f"[DEBUG] Stack detectada: {stack}")  
                 return stack
-        
-        return "Geral"  # Default se não detectar
+                
+        print(f"[DEBUG] Stack não detectada, usando 'Geral'")
+        return "Geral"  
 
     def _init_tech_stacks(self):  
         self.tech_stacks = {
@@ -128,25 +130,48 @@ class CareerAgent:
             return {"role": "assistant", "content": "Sistema temporariamente indisponível"}
 
     def _get_detailed_salary_info(self, stack: str) -> str:
-        """Resposta formatada com dados da stack específica"""
-        stack_data = self.tech_stacks.get(stack, {})
+        # Dados atualizados e mais completos
+        salary_data = {
+            "Frontend": {
+                "junior": "R$ 4.000 - 6.000",
+                "pleno": "R$ 7.000 - 10.000",
+                "senior": "R$ 11.000 - 15.000",
+                "skills": ["React", "TypeScript", "Next.js", "Jest", "Webpack"],
+                "fontes": ["Catho", "Glassdoor", "LoveMondays"]
+            },
+            "Backend": {
+                "junior": "R$ 5.000 - 8.000",
+                "pleno": "R$ 9.000 - 12.000",
+                "senior": "R$ 13.000 - 18.000",
+                "skills": ["Python", "Docker", "AWS", "PostgreSQL", "FastAPI"],
+                "fontes": ["Catho", "Glassdoor"]
+            },
+            "Data": {
+                "junior": "R$ 6.000 - 9.000",
+                "pleno": "R$ 10.000 - 14.000",
+                "senior": "R$ 15.000 - 22.000",
+                "skills": ["Python", "Pandas", "Spark", "TensorFlow", "Power BI"],
+                "fontes": ["Glassdoor", "LinkedIn"]
+            }
+        }
         
-        if not stack_data:
-            return "⚠️ Stack não encontrada. Diga qual área te interessa: Frontend, Backend ou Data?"
+        if stack not in salary_data:
+            return "⚠️ Área não reconhecida. Escolha entre: Frontend, Backend ou Data."
         
-        salary = stack_data.get("salary", "Não disponível")
-        skills = ", ".join(stack_data.get("skills", []))
-        dicas = "\n- ".join(stack_data.get("dicas", []))
-        
-        return (
-            f"📊 **Médias Salariais - {stack}:**\n"
-            f"Faixa: {salary}\n\n"
-            f"🛠️ **Habilidades Relevantes:**\n"
-            f"{skills}\n\n"
-            f"💡 **Dicas de Mercado:**\n"
-            f"- {dicas}"
+        data = salary_data[stack]
+        response = (
+            f"📊 **Médias Salariais para {stack}**\n\n"
+            f"• Júnior: {data['junior']}\n"
+            f"• Pleno: {data['pleno']}\n"
+            f"• Sênior: {data['senior']}\n\n"
+            f"🛠️ **Habilidades Essenciais:**\n"
+            f"{', '.join(data['skills'])}\n\n"
+            f"📈 **Fontes:** {', '.join(data['fontes'])}"
         )
-    
+        
+        print(f"[DEBUG] Resposta salarial gerada:\n{response}")  # Log
+        return response
+        
     def _get_salary_info(self) -> str:
         """Retorna informações salariais formatadas"""
         salaries = [f"{stack}: {data['salary']}" for stack, data in self.tech_stacks.items()]
@@ -213,6 +238,11 @@ class CareerAgent:
         except Exception as e:
             logger.error(f"Erro na classificação: {str(e)}")
             return "OUTROS"  
+
+        print(f"[DEBUG] Mensagem: '{message}'")
+        print(f"[DEBUG] Intenção detectada: {intent}")
+        
+        return intent        
             
     def _local_fallback(self, message: str) -> str:
         """Respostas de fallback melhoradas"""
@@ -272,4 +302,13 @@ class CareerAgent:
 
 if __name__ == "__main__":
     agent = CareerAgent()
-    print(agent.safe_respond("Preciso de ajuda com meu currículo", []))
+    
+    # Teste 1: Pergunta sobre salário
+    print("\n=== Teste 1 ===")
+    print("Entrada:", "Quais as médias salariais para frontend?")
+    print("Saída:", agent.safe_respond("Quais as médias salariais para frontend?", []))
+    
+    # Teste 2: Fallback
+    print("\n=== Teste 2 ===")
+    print("Entrada:", "Bom dia")
+    print("Saída:", agent.safe_respond("Bom dia", []))
