@@ -317,5 +317,5 @@ class CareerAgent:
 
 if __name__ == "__main__":
     agent = CareerAgent()
-    print(agent.client)  # Deve mostrar: <huggingface_hub.inference._client.InferenceClient object>
-    print(agent.conn)    # Deve mostrar: <sqlite3.Connection object>
+    print(agent.client)  
+    print(agent.conn)    
