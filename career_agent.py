@@ -55,13 +55,19 @@ class CareerAgent:
         self.conn.commit()
 
     def _detect_tech_stack(self, message: str) -> str:
-        """Detecta a stack tecnológica mencionada na mensagem"""
         message_lower = message.lower()
-        if any(kw in message_lower for kw in ["front", "react", "javascript"]):
-            return "Frontend"
-        elif any(kw in message_lower for kw in ["back", "python", "node"]):
-            return "Backend"
-            return "Fullstack"
+        
+        stack_keywords = {
+            "Frontend": ["front", "react", "javascript", "angular", "css"],
+            "Backend": ["back", "python", "java", "node", "api", "servidor"],
+            "Data Science": ["dados", "data", "analista", "machine learning", "bi"]
+        }
+        
+        for stack, keywords in stack_keywords.items():
+            if any(kw in message_lower for kw in keywords):
+                return stack
+        
+        return "Geral"  # Default se não detectar
 
     def _init_tech_stacks(self):  
         self.tech_stacks = {
@@ -92,9 +98,12 @@ class CareerAgent:
                 content = self._generate_resume_template(stack)
                 return {"role": "assistant", "content": content or "Modelo não disponível"}
                 
-            elif intent == "SALARIO":
-                content = self._get_salary_info()
-                return {"role": "assistant", "content": content or "Informações salariais indisponíveis"}
+            elif if intent == "SALARIO":
+                stack = self._detect_tech_stack(message)
+                return {
+                    "role": "assistant", 
+                    "content": self._get_detailed_salary_info(stack)  
+                }
                 
             else:
                 return {"role": "assistant", "content": self._general_response() or "Como posso ajudar?"}
@@ -118,6 +127,26 @@ class CareerAgent:
             logger.error(f"Erro crítico: {str(e)}")
             return {"role": "assistant", "content": "Sistema temporariamente indisponível"}
 
+    def _get_detailed_salary_info(self, stack: str) -> str:
+        """Resposta formatada com dados da stack específica"""
+        stack_data = self.tech_stacks.get(stack, {})
+        
+        if not stack_data:
+            return "⚠️ Stack não encontrada. Diga qual área te interessa: Frontend, Backend ou Data?"
+        
+        salary = stack_data.get("salary", "Não disponível")
+        skills = ", ".join(stack_data.get("skills", []))
+        dicas = "\n- ".join(stack_data.get("dicas", []))
+        
+        return (
+            f"📊 **Médias Salariais - {stack}:**\n"
+            f"Faixa: {salary}\n\n"
+            f"🛠️ **Habilidades Relevantes:**\n"
+            f"{skills}\n\n"
+            f"💡 **Dicas de Mercado:**\n"
+            f"- {dicas}"
+        )
+    
     def _get_salary_info(self) -> str:
         """Retorna informações salariais formatadas"""
         salaries = [f"{stack}: {data['salary']}" for stack, data in self.tech_stacks.items()]
@@ -148,11 +177,11 @@ class CareerAgent:
             return "OUTROS"
         
         # Dicionário de palavras-chave para fallback local
-        keyword_map = {
-            "VAGAS": ["vaga", "emprego", "oportunidad", "contrataç"],
-            "CURRICULO": ["currículo", "cv", "modelo", "resume"],
-            "SALARIO": ["salário", "remuneraç", "ganho", "pagamento"],
-            "PLANO": ["plano", "carreira", "progressão", "trajetória"]
+        keyword_map =  keyword_map = {
+            "VAGAS": ["vaga", "emprego", "oportunidades", "contratação", "linkedin"],
+            "CURRICULO": ["currículo", "cv", "modelo", "resume", "formatar"],
+            "SALARIO": ["salário", "remuneração", "ganho", "pagamento", "salariais", "média"],  
+            "PLANO": ["plano", "carreira", "progressão", "trajetória", "objetivo"]
         }
         
         # Primeiro verifica por palavras-chave locais (rápido)
