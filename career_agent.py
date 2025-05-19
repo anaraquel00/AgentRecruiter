@@ -332,10 +332,10 @@ class CareerAgent:
             "PLANO": ["plano", "carreira", "progressão", "trajetória", "objetivo"]
         }
         
-            for intent, keywords in keyword_map.items():
-                if any(kw in cleaned_msg for kw in keywords):
-                    logger.debug(f"Intenção detectada via keywords: {intent}")
-                    return intent
+        for intent, keywords in keyword_map.items():
+            if any(kw in cleaned_msg for kw in keywords):
+                logger.debug(f"Intenção detectada via keywords: {intent}")
+                return intent
             
         # Se não encontrou, usa o LLM para classificação refinada
         try:
