@@ -1,7 +1,11 @@
+
 import os
 import sqlite3
 import glob
 import logging
+import httpx
+from huggingface_hub import InferenceClient
+from functools import lru_cache
 from typing import Dict, List, Optional
 
 logger = logging.getLogger(__name__)
@@ -166,7 +170,6 @@ class CareerAgent:
     
     def safe_respond(self, message: str, history: List[List[str]]) -> Dict[str, str]:
         """Entry point seguro com validação completa"""
-        # Verificação crítica do client
         if not hasattr(self, 'client') or self.client is None:
             logger.critical("Cliente de inferência não inicializado!")
             return {"role": "assistant", "content": "Sistema temporariamente indisponível"}
