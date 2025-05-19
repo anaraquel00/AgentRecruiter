@@ -262,15 +262,15 @@ class CareerAgent:
         if not stack_data:  
             return "⚠️ Stack não reconhecida. Escolha entre: Frontend, Backend ou Data Science."  
     
-        response = (  
-            f"📚 **Pré-requisitos para {stack}**\n"  
-            f"🛠️ Habilidades Técnicas:\n"  
-            f"- {', '.join(stack_data.get('skills', []))}"  
-            f"🚀 Dicas de Estudo:\n"  
-            f"- {'\n- '.join(stack_data.get('dicas', []))}"  
-            f"💡 **Dica Bônus:** Pratique projetos reais e contribua em open-source!"  
-        )  
-        return response     
+        response = (
+            f"📚 **Pré-requisitos para {stack}**\n\n"
+            f"🛠️ Habilidades Técnicas:\n"
+            f"- {', '.join(stack_data.get('skills', []))}\n\n"  
+            f"🚀 Dicas de Estudo:\n"
+            f"- {'\n- '.join(stack_data.get('dicas', []))}\n\n"  
+            f"💡 **Dica Bônus:** Pratique projetos reais e contribua em open-source!"
+        )
+        return response  
 
     def _general_response(self) -> str:
         """Respostas personalizadas"""
