@@ -307,7 +307,7 @@ class CareerAgent:
                 jobs
             )
             self.conn.commit()
-                print("Dados inseridos com sucesso")
+            print("Dados inseridos com sucesso")
             
         except sqlite3.OperationalError as e:
             print(f"FALHA CRÍTICA NO SCHEMA: {str(e)}")
