@@ -263,7 +263,7 @@ class CareerAgent:
             return "⚠️ Stack não reconhecida. Escolha entre: Frontend, Backend ou Data Science."  
     
         response = (  
-            f"📚 **Pré-requisitos para {stack}**\n\n"  
+            f"📚 **Pré-requisitos para {stack}**\n"  
             f"🛠️ Habilidades Técnicas:\n"  
             f"- {', '.join(stack_data.get('skills', []))}"  
             f"🚀 Dicas de Estudo:\n"  
