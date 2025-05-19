@@ -1,4 +1,3 @@
-
 import os
 import sqlite3
 import glob
@@ -159,7 +158,23 @@ class CareerAgent:
                     "role": "assistant", 
                     "content": self._get_detailed_salary_info(stack)  
                 }
+
+            elif intent == "VAGAS":
+                tech = self._detect_tech_stack(message)  # Reaproveita a detecção
+                jobs = self._get_jobs(tech)
                 
+                if not jobs:
+                    return {"role": "assistant", "content": "⚠️ Nenhuma vaga encontrada para esta stack"}
+                
+                response = "🚀 **Vagas Encontradas:**\n\n"
+                for job in jobs:
+                    response += (
+                        f"• **{job['title']}** ({job['company']})\n"
+                        f"  💰 {job['salary']} | 🛠️ {job['skills']}\n"
+                        f"  🔗 {job['link']}\n\n"
+                    )
+                return {"role": "assistant", "content": response}
+            
             else:
                 return {"role": "assistant", "content": self._general_response() or "Como posso ajudar?"}
             
@@ -245,6 +260,21 @@ class CareerAgent:
             "Como posso ajudar você hoje?"
         )
 
+    def _get_jobs(self, skill: str) -> List[Dict]:
+        cursor = self.conn.cursor()
+        cursor.execute("""
+            SELECT title, company, skills, salary, link 
+            FROM jobs 
+            WHERE LOWER(skills) LIKE ? 
+            ORDER BY salary DESC
+        """, (f"%{skill.lower()}%",))
+        
+        return [
+            {"title": row[0], "company": row[1], "skills": row[2], 
+             "salary": row[3], "link": row[4]}
+            for row in cursor.fetchall()
+        ]    
+
     @lru_cache(maxsize=100)
     def _classify_intent(self, message: str) -> str:
         """
@@ -260,7 +290,7 @@ class CareerAgent:
         
         # Dicionário de palavras-chave para fallback local
         keyword_map =  keyword_map = {
-            "VAGAS": ["vaga", "emprego", "oportunidades", "contratação", "linkedin"],
+            "VAGAS": ["vaga", "emprego", "python", "oportunidade", "contratando", "java", "angular", "react"],
             "CURRICULO": ["currículo", "cv", "modelo", "resume", "formatar"],
             "SALARIO": ["salário", "remuneração", "ganho", "pagamento", "salariais", "média"],  
             "PLANO": ["plano", "carreira", "progressão", "trajetória", "objetivo"]
