@@ -365,7 +365,7 @@ class CareerAgent:
         except Exception as e:
             logger.error(f"Erro na classificação: {str(e)}")
             return "OUTROS"  
-conn = self._get_conn()
+                conn = self._get_conn()
                 cursor = conn.cursor() 
                 
                 query = """
