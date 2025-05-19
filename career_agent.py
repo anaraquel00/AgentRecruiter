@@ -174,12 +174,12 @@ class CareerAgent:
                 if not jobs:
                     return {"role": "assistant", "content": "⚠️ Nenhuma vaga encontrada para esta stack"}
                 
-                response = "🚀 **Vagas Encontradas:**\n\n"
+                response = "🚀 **Vagas Encontradas:**\n"
                 for job in jobs:
                     response += (
                         f"• **{job['title']}** ({job['company']})\n"
                         f"  💰 {job['salary']} | 🛠️ {job['skills']}\n"
-                        f"  🔗 {job['link']}\n\n"
+                        f"  🔗 {job['link']}\n"
                     )
                 return {"role": "assistant", "content": response}
             
@@ -265,9 +265,9 @@ class CareerAgent:
         response = (  
             f"📚 **Pré-requisitos para {stack}**\n\n"  
             f"🛠️ Habilidades Técnicas:\n"  
-            f"- {', '.join(stack_data.get('skills', []))}\n\n"  
+            f"- {', '.join(stack_data.get('skills', []))}"  
             f"🚀 Dicas de Estudo:\n"  
-            f"- {'\n- '.join(stack_data.get('dicas', []))}\n\n"  
+            f"- {'\n- '.join(stack_data.get('dicas', []))}"  
             f"💡 **Dica Bônus:** Pratique projetos reais e contribua em open-source!"  
         )  
         return response     
