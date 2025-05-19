@@ -13,13 +13,12 @@ class CareerAgent:
     def __init__(self):
         self.hf_token = self._validate_hf_token()
         self.db_path = os.path.join("/tmp", "career_agent.db")
-        
+        self._init_db()
         # Primeiro inicialize o client
         self.client = self._init_client()  # <--- Linha crítica
         
         # Depois os demais componentes
         self._init_tech_stacks()
-        self._init_db()  # <--- Agora o DB será criado após o client
         self._seed_database()
         
     def _init_db(self):
@@ -28,12 +27,12 @@ class CareerAgent:
         cursor = self.conn.cursor()
         
         # Forçar a criação da tabela com a nova estrutura
-        cursor.execute("DROP TABLE IF EXISTS jobs")  # Remove tabela antiga
+        cursor.execute("DROP TABLE IF EXISTS jobs")
         cursor.execute("""
             CREATE TABLE jobs (
                 id INTEGER PRIMARY KEY,
-                title TEXT,
-                company TEXT,
+                title TEXT NOT NULL,
+                company TEXT NOT NULL,
                 skills TEXT,
                 salary TEXT,
                 link TEXT
