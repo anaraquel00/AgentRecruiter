@@ -108,6 +108,7 @@ class CareerAgent:
 
     def _detect_tech_stack(self, message: str) -> str:
         message_lower = message.lower()
+        logger.debug(f"Detectando stack para mensagem: {message_lower}")
         
         stack_keywords = {
             "Frontend": ["frontend", "front-end", "react", "javascript", "angular"],
@@ -160,7 +161,7 @@ class CareerAgent:
                 }
 
             elif intent == "VAGAS":
-                tech = self._detect_tech_stack(message)  # Reaproveita a detecção
+                tech = self._detect_tech_stack(message)  
                 jobs = self._get_jobs(tech)
                 
                 if not jobs:
@@ -354,7 +355,8 @@ class CareerAgent:
             cursor.execute("SELECT company FROM jobs LIMIT 1")
             jobs = [
                 (1, "Desenvolvedor Frontend", "Tech Solutions", "React/TypeScript", "R$ 8.000", "https://exemplo.com/vaga1"),
-                (2, "Engenheiro de Dados", "Data Corp", "Python/SQL", "R$ 12.000", "https://exemplo.com/vaga2")
+                (2, "Engenheiro de Dados", "Data Corp", "Python/SQL", "R$ 12.000", "https://exemplo.com/vaga2"),
+                (3, "Cientista de Dados", "AI Tech", "Python/Pandas", "R$ 15.000", "https://exemplo.com/vaga3")
             ]
             
             cursor = self.conn.cursor()
