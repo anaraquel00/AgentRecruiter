@@ -274,9 +274,9 @@ class CareerAgent:
     
         # Constrói a resposta
         response = (
-            f"📚 **Pré-requisitos para {stack}**\n\n"
-            f"🛠️ Habilidades Técnicas:\n- {', '.join(skills)}\n\n"
-            f"🚀 Dicas de Estudo:\n- {'\n- '.join(dicas)}\n\n"
+            f"📚 **Pré-requisitos para {stack}**\n"
+            f"🛠️ Habilidades Técnicas:\n- {', '.join(skills)}\n"
+            f"🚀 Dicas de Estudo:\n- {'\n- '.join(dicas)}\n"
             f"💡 **Dica Bônus:** Pratique projetos reais!"
         )
         return response 
