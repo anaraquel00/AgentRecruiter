@@ -366,7 +366,7 @@ class CareerAgent:
             
         except Exception as e:
             logger.error(f"Erro na classificação: {str(e)}")
-                return "OUTROS"  
+            return "OUTROS"  
                 conn = self._get_conn()
                 cursor = conn.cursor() 
                 
@@ -376,20 +376,21 @@ class CareerAgent:
                     WHERE LOWER(skills) LIKE ? 
                     ORDER BY salary DESC
                 """
-                logger.debug(f"Executando query: {query}")  # <--- Log da query
-                logger.debug(f"Parâmetro: %{skill.lower()}%")  # <--- Log do parâmetro
+                logger.debug(f"Executando query: {query}")  
+                logger.debug(f"Parâmetro: %{skill.lower()}%") 
                 
                 cursor.execute(query, (f"%{skill.lower()}%",))
                 
-                return [
+            return [
                     {"title": row[0], "company": row[1], "skills": row[2], 
                      "salary": row[3], "link": row[4]}
                     for row in cursor.fetchall()
-                ]    
+            ]    
+        
         print(f"[DEBUG] Mensagem: '{message}'")
         print(f"[DEBUG] Intenção detectada: {intent}")
         
-        return intent        
+            return intent        
             
     def _local_fallback(self, message: str) -> str:
         """Respostas de fallback melhoradas"""
