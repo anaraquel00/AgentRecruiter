@@ -74,6 +74,7 @@ class CareerAgent:
                     link TEXT
                 )
             """)
+            logger.debug("Tabela 'jobs' criada com sucesso!")
             self._seed_initial_data(conn)  # ← Seed acontece aqui
         finally:
             conn.close()  
@@ -292,14 +293,21 @@ class CareerAgent:
         )
 
     def _get_jobs(self, skill: str) -> List[Dict]:
-        conn = self._get_conn()
-        cursor.execute("""
-            SELECT title, company, skills, salary, link 
-            FROM jobs 
-            WHERE LOWER(skills) LIKE ? 
-            ORDER BY salary DESC
-        """, (f"%{skill.lower()}%",))
-        
+        try:
+            conn = self._get_conn()
+            cursor = conn.cursor() 
+            
+            query = """
+                SELECT title, company, skills, salary, link 
+                FROM jobs 
+                WHERE LOWER(skills) LIKE ? 
+                ORDER BY salary DESC
+            """
+            logger.debug(f"Executando query: {query}")  # <--- Log da query
+            logger.debug(f"Parâmetro: %{skill.lower()}%")  # <--- Log do parâmetro
+            
+            cursor.execute(query, (f"%{skill.lower()}%",))
+            
         return [
             {"title": row[0], "company": row[1], "skills": row[2], 
              "salary": row[3], "link": row[4]}
@@ -396,7 +404,7 @@ class CareerAgent:
                 jobs
             )
             conn.commit()
-            logger.info("Dados iniciais inseridos com sucesso!")
+            logger.info(f"Dados iniciais inseridos: {len(jobs)} vagas") 
                       
         except Exception as e:
             logger.error(f"Falha ao inserir dados: {str(e)}")
