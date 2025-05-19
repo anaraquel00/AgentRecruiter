@@ -1,52 +1,82 @@
-import glob 
 import os
 import sqlite3
+import glob
 import logging
-from typing import Dict, List, Optional  
-import httpx  
-from httpx import Timeout  
-from functools import lru_cache
-from huggingface_hub import InferenceClient
+from typing import Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
 class CareerAgent:
     def __init__(self):
-        self.db_path = os.path.join("/tmp", "career_agent.db")
-        self._nuke_database()  # Método novo
+        self.db_path = os.path.abspath("/tmp/career_agent.db")  # Caminho absoluto
+        self._nuke_database()
         self.hf_token = self._validate_hf_token()
         self.conn = self._create_connection()
         self._init_db()
         self.client = self._init_client()
         self._init_tech_stacks()
         self._seed_database()
+        logger.info("CareerAgent inicializado com sucesso!")
 
     def _nuke_database(self):
-        """Remove completamente o banco de dados e arquivos temporários"""
-        # Lista todos os arquivos relacionados
-        temp_files = glob.glob(f"{self.db_path}*")  # Correto com o módulo importado
+        """Destruição total do banco com verificação em 3 níveis"""
+        # Nível 1: Remoção padrão
+        if os.path.exists(self.db_path):
+            os.remove(self.db_path)
+            logger.info(f"Removido banco principal: {self.db_path}")
         
-        for file_path in temp_files:
+        # Nível 2: Arquivos temporários do SQLite
+        temp_files = glob.glob(f"{self.db_path}*")
+        for f in temp_files:
             try:
-                os.remove(file_path)
-                print(f"🗑️ Arquivo removido: {file_path}")
+                os.remove(f)
+                logger.info(f"Removido arquivo temporário: {f}")
             except Exception as e:
-                print(f"⚠️ Erro ao remover {file_path}: {str(e)}")
+                logger.error(f"Falha ao remover {f}: {str(e)}")
         
-        print("✅ Limpeza do banco concluída")
-    
-        # Verificação final
-        if not glob.glob(f"{self.db_path}*"):
-            print("✅ Banco de dados e arquivos temporários totalmente removidos")
-        else:
-            print("❌ Aviso: Alguns arquivos residuais permaneceram")
+        # Nível 3: Verificação final
+        if any(os.path.exists(f) for f in [self.db_path] + temp_files):
+            raise RuntimeError("FALHA CRÍTICA: Não foi possível limpar o banco!")
 
     def _create_connection(self):
-        """Cria conexão com verificação explícita"""
+        """Cria conexão com configurações de desempenho e verificação"""
         conn = sqlite3.connect(self.db_path)
-        conn.execute("PRAGMA foreign_keys = ON")
-        conn.execute("PRAGMA journal_mode = WAL")  # Modo de escrita melhorado
+        conn.execute("PRAGMA foreign_keys = 1")
+        conn.execute("PRAGMA journal_mode = WAL")
+        conn.execute("PRAGMA synchronous = NORMAL")
         return conn
+
+    def _init_db(self):
+        """Criação da tabela com verificação quântica"""
+        with self.conn:
+            cursor = self.conn.cursor()
+            
+            # Forçar recriação da tabela
+            cursor.execute("DROP TABLE IF EXISTS jobs")
+            
+            # Schema com verificação de hash
+            schema = """
+            CREATE TABLE jobs (
+                id INTEGER PRIMARY KEY,
+                title TEXT NOT NULL CHECK(length(title) <= 100),
+                company TEXT NOT NULL CHECK(length(company) <= 50),
+                skills TEXT CHECK(length(skills) <= 200),
+                salary TEXT CHECK(length(salary) <= 20),
+                link TEXT CHECK(link LIKE 'http%')
+            )"""
+            cursor.execute(schema)
+            
+            # Verificação pós-criação
+            cursor.execute("PRAGMA table_info(jobs)")
+            columns = {col[1]: col for col in cursor.fetchall()}
+            required_columns = ['id', 'title', 'company', 'skills', 'salary', 'link']
+            
+            if not all(col in columns for col in required_columns):
+                logger.critical("Schema corrompido! Colunas faltantes:")
+                for col in required_columns:
+                    if col not in columns:
+                        logger.critical(f" - {col}")
+                raise RuntimeError("Erro fatal na criação do banco")
 
     def _clean_database(self):
         """Remove completamente o banco de dados existente"""
@@ -55,34 +85,6 @@ class CareerAgent:
             os.remove(db_path)
             print(f"Banco de dados antigo removido: {db_path}")    
         
-    def _init_db(self):
-        """Criação de tabela com verificação atômica"""
-        with self.conn:  # Usando transação
-            cursor = self.conn.cursor()
-            
-            # Verificação quântica do schema
-            cursor.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='jobs'")
-            table_sql = cursor.fetchone()
-            
-            expected_sql = """CREATE TABLE jobs (
-                id INTEGER PRIMARY KEY,
-                title TEXT,
-                company TEXT,
-                skills TEXT,
-                salary TEXT,
-                link TEXT)"""
-                
-            if not table_sql or not table_sql[0].strip().upper() == expected_sql.strip().upper():
-                print("🔄 Recriando tabela jobs...")
-                cursor.execute("DROP TABLE IF EXISTS jobs")
-                cursor.execute(expected_sql)
-                self.conn.commit()
-                
-                # Verificação final
-                cursor.execute("PRAGMA table_info(jobs)")
-                columns = [col[1] for col in cursor.fetchall()]
-                assert 'company' in columns, "❌ Coluna company ausente!"
-
     def _validate_hf_token(self):
         token = os.getenv("HF_TOKEN")
         if not token or not token.startswith("hf_"):
@@ -100,18 +102,6 @@ class CareerAgent:
         except Exception as e:
             logger.error(f"Falha ao criar client: {str(e)}")
             raise RuntimeError("Serviço de IA indisponível") from e
-
-    def _init_db(self):
-        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
-        self.conn = sqlite3.connect(self.db_path)
-        cursor = self.conn.cursor()
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS jobs (
-                id INTEGER PRIMARY KEY,
-                title TEXT
-            )
-        """)
-        self.conn.commit()
 
     def _detect_tech_stack(self, message: str) -> str:
         message_lower = message.lower()
