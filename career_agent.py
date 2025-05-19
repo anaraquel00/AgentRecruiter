@@ -112,7 +112,7 @@ class CareerAgent:
         
         stack_keywords = {
             "Frontend": ["frontend", "front-end", "react", "javascript", "angular"],
-            "Backend": ["back", "python", "java", "node", "api", "servidor"],
+            "Backend": ["backend", "back-end", "python", "java", "node", "api", "api rest", "api restfull", "servidor"],
             "Data Science": ["dados", "data", "analista", "machine learning", "bi"]
         }
         
@@ -127,18 +127,18 @@ class CareerAgent:
     def _init_tech_stacks(self):  
         self.tech_stacks = {
             "Frontend": {
-                "skills": ["React", "TypeScript", "Next.js", "Jest"],
-                "salary": "R$ 4.500 - R$ 14.000",
+                "skills": ["Angular", "React", "Node.js", " Vue.js", "TypeScript", "Next.js", "Jest"],
+                "salary": "R$ 3.500 - R$ 14.000",
                 "dicas": ["Domine componentização", "Aprimore acessibilidade"]
             },
             "Backend": {
-                "skills": ["Python", "FastAPI", "Docker", "PostgreSQL"],
-                "salary": "R$ 6.000 - R$ 16.000",
-                "dicas": ["Estude arquitetura limpa", "Aprenda Kubernetes"]
+                "skills": ["Python", "Java", "FastAPI", "API Rest", "APIs RESTfull", "Docker", "PostgreSQL"],
+                "salary": "R$ 3.000 - R$ 16.000",
+                "dicas": ["Estude arquitetura limpa", "Aprenda Kubernetes", "Aprenda fundamentos de Python", "Aprenda Java POO"]
             },
             "Data Science": {
-                "skills": ["Python", "Pandas", "MLflow", "Spark"],
-                "salary": "R$ 8.000 - R$ 20.000",
+                "skills": ["Python", "MySQL", "PosteGreSQL", "MongoDB", "Pandas", "MLflow", "Spark"],
+                "salary": "R$ 5.000 - R$ 20.000",
                 "dicas": ["Domine visualização de dados", "Pratique feature engineering"]
             }
         }
@@ -152,6 +152,13 @@ class CareerAgent:
                 stack = self._detect_tech_stack(message)
                 content = self._generate_resume_template(stack)
                 return {"role": "assistant", "content": content or "Modelo não disponível"}
+
+            elif intent == "PREREQ":  
+                stack = self._detect_tech_stack(message)  
+                return {  
+                    "role": "assistant",  
+                    "content": self._get_requirements(stack)  
+                }     
                 
             elif intent == "SALARIO":
                 stack = self._detect_tech_stack(message)
@@ -250,6 +257,21 @@ class CareerAgent:
         salaries = [f"{stack}: {data['salary']}" for stack, data in self.tech_stacks.items()]
         return " | ".join(salaries) if salaries else ""
 
+    def _get_requirements(self, stack: str) -> str:  
+        stack_data = self.tech_stacks.get(stack, {})  
+        if not stack_data:  
+            return "⚠️ Stack não reconhecida. Escolha entre: Frontend, Backend ou Data Science."  
+    
+        response = (  
+            f"📚 **Pré-requisitos para {stack}**\n\n"  
+            f"🛠️ Habilidades Técnicas:\n"  
+            f"- {', '.join(stack_data.get('skills', []))}\n\n"  
+            f"🚀 Dicas de Estudo:\n"  
+            f"- {'\n- '.join(stack_data.get('dicas', []))}\n\n"  
+            f"💡 **Dica Bônus:** Pratique projetos reais e contribua em open-source!"  
+        )  
+        return response      
+
     def _general_response(self) -> str:
         """Respostas personalizadas"""
         return (
@@ -293,6 +315,7 @@ class CareerAgent:
         keyword_map =  keyword_map = {
             "VAGAS": ["vaga", "emprego", "python", "oportunidade", "contratando", "java", "angular", "react"],
             "CURRICULO": ["currículo", "cv", "modelo", "resume", "formatar"],
+            "PREREQ": ["pré-requisitos", "requisitos", "habilidades necessárias", "habilidades técnicas", "o que preciso saber"], 
             "SALARIO": ["salário", "remuneração", "ganho", "pagamento", "salariais", "média"],  
             "PLANO": ["plano", "carreira", "progressão", "trajetória", "objetivo"]
         }
