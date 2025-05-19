@@ -10,6 +10,18 @@ from huggingface_hub import InferenceClient
 logger = logging.getLogger(__name__)
 
 class CareerAgent:
+    def __init__(self):
+        self.hf_token = self._validate_hf_token()
+        self.db_path = os.path.join("/tmp", "career_agent.db")
+        
+        # Primeiro inicialize o client
+        self.client = self._init_client()  # <--- Linha crítica
+        
+        # Depois os demais componentes
+        self._init_tech_stacks()
+        self._init_db()  # <--- Agora o DB será criado após o client
+        self._seed_database()
+        
     def _init_db(self):
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
         self.conn = sqlite3.connect(self.db_path)
@@ -32,15 +44,17 @@ class CareerAgent:
             raise ValueError("HF_TOKEN inválido ou ausente!")
         return token
 
-    
-    
     def _init_client(self):
-        """Configuração segura do cliente"""
-        self.client = InferenceClient(
-            model="HuggingFaceH4/zephyr-7b-beta",
-            token=self.hf_token,
-            timeout=10
-        )
+        """Deve RETORNAR a instância do client"""
+        try:
+            return InferenceClient(
+                model="HuggingFaceH4/zephyr-7b-beta",
+                token=self.hf_token,
+                timeout=30
+            )
+        except Exception as e:
+            logger.error(f"Falha ao criar client: {str(e)}")
+            raise RuntimeError("Serviço de IA indisponível") from e
 
     def _init_db(self):
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
@@ -117,6 +131,11 @@ class CareerAgent:
     
     def safe_respond(self, message: str, history: List[List[str]]) -> Dict[str, str]:
         """Entry point seguro com validação completa"""
+        # Verificação crítica do client
+        if not hasattr(self, 'client') or self.client is None:
+            logger.critical("Cliente de inferência não inicializado!")
+            return {"role": "assistant", "content": "Sistema temporariamente indisponível"}
+            """Entry point seguro com validação completa"""
         try:
             # Validação de entrada
             if not isinstance(message, str) or len(message.strip()) < 2:
@@ -285,15 +304,6 @@ class CareerAgent:
     def enhanced_respond(self, message: str, history: list) -> dict:
         return {"role": "assistant", "content": self._query_llm(message)}
 
-    def _classify_intent(self, message: str) -> str:
-        prompt = f"""Classifique esta mensagem:
-        Mensagem: "{message}"
-        Opções: VAGAS, CURRICULO, SALARIO, OUTROS
-        Responda apenas com a opção em MAIÚSCULAS."""
-        
-        response = self._query_llm(prompt).strip()
-        return response if response in ["VAGAS", "CURRICULO", "SALARIO"] else "OUTROS"
-
     def _generate_resume_template(self, stack: str) -> str:
         return f"""
         📄 Modelo de Currículo - {stack}
@@ -302,13 +312,5 @@ class CareerAgent:
 
 if __name__ == "__main__":
     agent = CareerAgent()
-    
-    # Teste 1: Pergunta sobre salário
-    print("\n=== Teste 1 ===")
-    print("Entrada:", "Quais as médias salariais para frontend?")
-    print("Saída:", agent.safe_respond("Quais as médias salariais para frontend?", []))
-    
-    # Teste 2: Fallback
-    print("\n=== Teste 2 ===")
-    print("Entrada:", "Bom dia")
-    print("Saída:", agent.safe_respond("Bom dia", []))
+    print(agent.client)  # Deve mostrar: <huggingface_hub.inference._client.InferenceClient object>
+    print(agent.conn)    # Deve mostrar: <sqlite3.Connection object>
