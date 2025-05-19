@@ -27,7 +27,7 @@ def create_interface():
         examples=[
             ["Como criar um currículo para backend?"],
             ["Quais as médias salariais para frontend?"],
-            ["Me mostre vagas de python"]
+            ["Quais são os pré-requisitos para ser um desenvolvedor backend em java?"]
         ],
         title="🤖 Career Agent",
         description="Assistente de Carreira em Tecnologia",
