@@ -270,7 +270,7 @@ class CareerAgent:
             f"- {'\n- '.join(stack_data.get('dicas', []))}\n\n"  
             f"💡 **Dica Bônus:** Pratique projetos reais e contribua em open-source!"  
         )  
-        return response      
+        return response     
 
     def _general_response(self) -> str:
         """Respostas personalizadas"""
