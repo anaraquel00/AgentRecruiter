@@ -286,11 +286,13 @@ class CareerAgent:
             (1, "Desenvolvedor Frontend", "Tech Solutions", "React/TypeScript", "R$ 8.000", "https://exemplo.com/vaga1"),
             (2, "Engenheiro de Dados", "Data Corp", "Python/SQL", "R$ 12.000", "https://exemplo.com/vaga2")
         ]
-        self.conn.executemany(
+        
+        cursor = self.conn.cursor()
+        cursor.executemany(
             "INSERT INTO jobs (id, title, company, skills, salary, link) VALUES (?, ?, ?, ?, ?, ?)",
             jobs
         )
-
+        self.conn.commit()
     
     @lru_cache(maxsize=100)
     def _query_llm(self, prompt: str) -> str:
