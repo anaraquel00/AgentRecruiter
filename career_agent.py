@@ -22,16 +22,22 @@ class CareerAgent:
 
     def _nuke_database(self):
         """Destrói completamente qualquer vestígio do banco antigo"""
-        if os.path.exists(self.db_path):
-            os.chmod(self.db_path, 0o777)  # Força permissões
-            os.remove(self.db_path)
-            print(f"💥 Banco destruído: {self.db_path}")
-            
-        # Limpeza adicional para arquivos temporários
-        temp_files = glob.glob(f"{self.db_path}*")
+        # Lista todos os arquivos relacionados
+        temp_files = glob.glob(f"{self.db_path}*")  # Agora com a importação correta
+        
         for f in temp_files:
-            os.remove(f)
-            print(f"🧹 Arquivo residual removido: {f}")
+            try:
+                os.chmod(f, 0o777)  # Força permissões de escrita
+                os.remove(f)
+                print(f"🧹 Removido: {f}")
+            except Exception as e:
+                print(f"⚠️ Erro ao remover {f}: {str(e)}")
+    
+    # Verificação final
+    if not glob.glob(f"{self.db_path}*"):
+        print("✅ Banco de dados e arquivos temporários totalmente removidos")
+    else:
+        print("❌ Aviso: Alguns arquivos residuais permaneceram")
 
     def _create_connection(self):
         """Cria conexão com verificação explícita"""
