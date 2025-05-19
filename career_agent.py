@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 class CareerAgent:
     def __init__(self):
-        self.db_path = os.path.abspath("/tmp/career_agent.db")  # Caminho absoluto
+        self.db_path = os.path.abspath("/tmp/career_agent.db")  
         self._nuke_database()
         self.hf_token = self._validate_hf_token()
         self.local = threading.local()  
