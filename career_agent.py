@@ -308,11 +308,11 @@ class CareerAgent:
             
             cursor.execute(query, (f"%{skill.lower()}%",))
             
-        return [
-            {"title": row[0], "company": row[1], "skills": row[2], 
-             "salary": row[3], "link": row[4]}
-            for row in cursor.fetchall()
-        ]    
+            return [
+                {"title": row[0], "company": row[1], "skills": row[2], 
+                 "salary": row[3], "link": row[4]}
+                for row in cursor.fetchall()
+            ]    
 
     @lru_cache(maxsize=100)
     def _classify_intent(self, message: str) -> str:
