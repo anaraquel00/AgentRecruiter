@@ -26,15 +26,18 @@ class CareerAgent:
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
         self.conn = sqlite3.connect(self.db_path)
         cursor = self.conn.cursor()
+        
+        # Forçar a criação da tabela com a nova estrutura
+        cursor.execute("DROP TABLE IF EXISTS jobs")  # Remove tabela antiga
         cursor.execute("""
-        CREATE TABLE IF NOT EXISTS jobs (
-            id INTEGER PRIMARY KEY,
-            title TEXT,
-            company TEXT,  
-            skills TEXT,   
-            salary TEXT,   
-            link TEXT      
-        )
+            CREATE TABLE jobs (
+                id INTEGER PRIMARY KEY,
+                title TEXT,
+                company TEXT,
+                skills TEXT,
+                salary TEXT,
+                link TEXT
+            )
         """)
         self.conn.commit()
 
