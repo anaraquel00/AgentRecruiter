@@ -299,7 +299,7 @@ class CareerAgent:
         try:
             response = self.client.chat_completion(
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=800
+                max_tokens=900
             )
             return response.choices[0].message.content
         except Exception as e:
