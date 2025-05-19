@@ -1,3 +1,4 @@
+import glob 
 import os
 import sqlite3
 import logging
@@ -21,23 +22,24 @@ class CareerAgent:
         self._seed_database()
 
     def _nuke_database(self):
-        """Destrói completamente qualquer vestígio do banco antigo"""
+        """Remove completamente o banco de dados e arquivos temporários"""
         # Lista todos os arquivos relacionados
-        temp_files = glob.glob(f"{self.db_path}*")  # Agora com a importação correta
+        temp_files = glob.glob(f"{self.db_path}*")  # Correto com o módulo importado
         
-        for f in temp_files:
+        for file_path in temp_files:
             try:
-                os.chmod(f, 0o777)  # Força permissões de escrita
-                os.remove(f)
-                print(f"🧹 Removido: {f}")
+                os.remove(file_path)
+                print(f"🗑️ Arquivo removido: {file_path}")
             except Exception as e:
-                print(f"⚠️ Erro ao remover {f}: {str(e)}")
+                print(f"⚠️ Erro ao remover {file_path}: {str(e)}")
+        
+        print("✅ Limpeza do banco concluída")
     
-    # Verificação final
-    if not glob.glob(f"{self.db_path}*"):
-        print("✅ Banco de dados e arquivos temporários totalmente removidos")
-    else:
-        print("❌ Aviso: Alguns arquivos residuais permaneceram")
+        # Verificação final
+        if not glob.glob(f"{self.db_path}*"):
+            print("✅ Banco de dados e arquivos temporários totalmente removidos")
+        else:
+            print("❌ Aviso: Alguns arquivos residuais permaneceram")
 
     def _create_connection(self):
         """Cria conexão com verificação explícita"""
