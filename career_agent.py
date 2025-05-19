@@ -11,13 +11,34 @@ logger = logging.getLogger(__name__)
 
 class CareerAgent:
     def __init__(self):
-        self._clean_database() 
-        self.hf_token = self._validate_hf_token()
         self.db_path = os.path.join("/tmp", "career_agent.db")
+        self._nuke_database()  # Método novo
+        self.hf_token = self._validate_hf_token()
+        self.conn = self._create_connection()
         self._init_db()
-        self.client = self._init_client()  
+        self.client = self._init_client()
         self._init_tech_stacks()
         self._seed_database()
+
+    def _nuke_database(self):
+        """Destrói completamente qualquer vestígio do banco antigo"""
+        if os.path.exists(self.db_path):
+            os.chmod(self.db_path, 0o777)  # Força permissões
+            os.remove(self.db_path)
+            print(f"💥 Banco destruído: {self.db_path}")
+            
+        # Limpeza adicional para arquivos temporários
+        temp_files = glob.glob(f"{self.db_path}*")
+        for f in temp_files:
+            os.remove(f)
+            print(f"🧹 Arquivo residual removido: {f}")
+
+    def _create_connection(self):
+        """Cria conexão com verificação explícita"""
+        conn = sqlite3.connect(self.db_path)
+        conn.execute("PRAGMA foreign_keys = ON")
+        conn.execute("PRAGMA journal_mode = WAL")  # Modo de escrita melhorado
+        return conn
 
     def _clean_database(self):
         """Remove completamente o banco de dados existente"""
@@ -27,28 +48,32 @@ class CareerAgent:
             print(f"Banco de dados antigo removido: {db_path}")    
         
     def _init_db(self):
-        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
-        self.conn = sqlite3.connect(self.db_path)
-        cursor = self.conn.cursor()
-        
-        cursor.execute("PRAGMA user_version")
-        version = cursor.fetchone()[0] or 0
-        
-        if version < 1:  # Altere este número ao atualizar o schema
-            cursor.execute("DROP TABLE IF EXISTS jobs")
-            cursor.execute("""
-                CREATE TABLE jobs (
-                    id INTEGER PRIMARY KEY,
-                    title TEXT,
-                    company TEXT,
-                    skills TEXT,
-                    salary TEXT,
-                    link TEXT
-                )
-            """)
-            cursor.execute("PRAGMA user_version = 1")  # Atualiza versão
-            self.conn.commit()
-            print("Schema do banco criado/atualizado")
+        """Criação de tabela com verificação atômica"""
+        with self.conn:  # Usando transação
+            cursor = self.conn.cursor()
+            
+            # Verificação quântica do schema
+            cursor.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='jobs'")
+            table_sql = cursor.fetchone()
+            
+            expected_sql = """CREATE TABLE jobs (
+                id INTEGER PRIMARY KEY,
+                title TEXT,
+                company TEXT,
+                skills TEXT,
+                salary TEXT,
+                link TEXT)"""
+                
+            if not table_sql or not table_sql[0].strip().upper() == expected_sql.strip().upper():
+                print("🔄 Recriando tabela jobs...")
+                cursor.execute("DROP TABLE IF EXISTS jobs")
+                cursor.execute(expected_sql)
+                self.conn.commit()
+                
+                # Verificação final
+                cursor.execute("PRAGMA table_info(jobs)")
+                columns = [col[1] for col in cursor.fetchall()]
+                assert 'company' in columns, "❌ Coluna company ausente!"
 
     def _validate_hf_token(self):
         token = os.getenv("HF_TOKEN")
