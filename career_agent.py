@@ -270,13 +270,15 @@ class CareerAgent:
         dicas = stack_data.get("dicas", [])
         
         # Log dos dados encontrados
-        logger.debug(f"Dados para {stack}: skills={skills}, dicas={dicas}")
+        dicas_formatadas = "\n- ".join(stack_data.get('dicas', []))
     
         # Constrói a resposta
         response = (
-            f"📚 **Pré-requisitos para {stack}**\n"
-            f"🛠️ Habilidades Técnicas:\n- {', '.join(skills)}\n"
-            f"🚀 Dicas de Estudo:\n- {'\n- '.join(dicas)}\n"
+            f"📚 **Pré-requisitos para {stack}**\n\n"
+            f"🛠️ Habilidades Técnicas:\n-" 
+            f"- {', '.join(stack_data.get('skills', []))}\n\n"
+            f"🚀 Dicas de Estudo:\n-" 
+            f"- {dicas_formatadas}\n\n"
             f"💡 **Dica Bônus:** Pratique projetos reais!"
         )
         return response 
