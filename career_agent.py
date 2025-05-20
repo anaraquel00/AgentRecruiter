@@ -109,10 +109,10 @@ class CareerAgent:
         logger.debug(f"Detectando stack para: '{message_lower}'")
         
         stack_keywords = {
-            "Frontend": ["frontend", "front-end", "react", "javascript", "angular"],
-            "Backend": ["backend", "back-end", "python", "java", "node", "api", "api rest", "api restfull", "servidor"],
-            "Fullstack": ["fullstack", "full-stack", "react+node", "mern", "mevn", "django", "next.js"],
-            "Data Science": ["dados", "data", "analista", "machine learning", "bi"]
+            "Fullstack": ["fullstack", "full-stack", "react e node", "front e back", "angular e java", "react+node", "mern", "mevn", "django", "next.js"],
+            "Frontend": ["frontend", "react", "angular", "vue", "css", "ux/ui", "typescript"],
+            "Backend": ["backend", "java", "python", "api", "microserviços", "spring", "node.js"],
+            "Data Science": ["dados", "data science", "machine learning", "power bi", "pandas"]
         }
         
         for stack, keywords in stack_keywords.items():
