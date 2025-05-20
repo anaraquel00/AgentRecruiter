@@ -11,40 +11,56 @@ logging.basicConfig(
 def create_interface():
     agent = CareerAgent()
     
-    def chat_fn(message: str, history: list):
-        try:
-            response = agent.safe_respond(message, history)
-            # Garante que o conteúdo nunca seja vazio
-            if not response.get("content"):
-                response["content"] = "Não consegui processar sua solicitação. Tente novamente."
-            return response["content"]
-        except Exception as e:
-            logging.error(f"Erro na interface: {str(e)}")
-            return "Ocorreu um erro interno. Por favor, recarregue a página."
+    # Custom CSS para melhorar o visual
+    custom_css = """
+    footer {visibility: hidden}
+    .title {text-align: center; font-family: 'Roboto', sans-serif; color: #2d3436; 
+            background: linear-gradient(90deg, #a8edea 0%, #fed6e3 100%); padding: 20px!important; border-radius: 10px}
+    .description {font-size: 1.1em!important; color: #636e72!important; padding: 15px 25px!important}
+    .gradio-container {background: #f8f9fa!important}
+    """
 
-    interface = gr.ChatInterface(
-        fn=chat_fn,
-        examples=[
-            ["🎯 Serviços disponíveis:\n\n"
-            "1. 🔍 Análise de currículo\n"
-            "2. 💰 Pesquisa salarial\n"
-            "3. 📌 Vagas personalizadas\n"
-            "4. 🚀 Planos de carreira\n\n"
-            "Como posso ajudar você hoje?"],            
-        ],
-        title="🤖 Career Agent",
-        description="Assistente de Carreira em Tecnologia",
-        theme="soft",
-        cache_examples=False  # Importante para evitar os erros de cache
-    )
-    
+    with gr.Blocks(css=custom_css, theme="soft") as interface:
+        # Header Estilizado
+        gr.HTML("""
+        <div class="title">
+            <h1>🤖 Career Agent Pro</h1>
+            <p style="font-size: 0.9em">Seu Consultor de Carreira em IA</p>
+        </div>
+        """)
+
+        # Área do Chat
+        chatbot = gr.Chatbot(height=500, label="Sessão de Conversa")
+        msg = gr.Textbox(label="Sua Mensagem", placeholder="Digite sua pergunta...")
+        
+        # Exemplos em Accordion
+        with gr.Accordion("📌 Exemplos de Perguntas", open=False):
+            gr.Examples(
+                examples=[
+                    ["Como criar um currículo para backend Java?"],
+                    ["Qual a média salarial para cientista de dados?"],
+                    ["Mostre vagas de Python em São Paulo"],
+                    ["Plano de carreira para desenvolvedor fullstack"]
+                ],
+                inputs=msg,
+                label="Clique para carregar exemplos"
+            )
+
+        # Botões de Ação
+        with gr.Row():
+            clear_btn = gr.Button("🧹 Limpar Chat")
+            submit_btn = gr.Button("🚀 Enviar Pergunta", variant="primary")
+
+        # Footer Informativo
+        gr.HTML("""
+        <div class="footer" style="text-align: center; padding: 15px; color: #636e72">
+            <p>Powered by HuggingFace 🤗 | v1.2.0 | Ética em IA ⚖️</p>
+        </div>
+        """)
+
+        # Lógica de Interação
+        msg.submit(fn=chat_fn, inputs=[msg, chatbot], outputs=[chatbot])
+        submit_btn.click(fn=chat_fn, inputs=[msg, chatbot], outputs=[chatbot])
+        clear_btn.click(lambda: None, None, chatbot, queue=False)
+
     return interface
-
-if __name__ == "__main__":
-    app = create_interface()
-    app.launch(
-        server_name="0.0.0.0",
-        server_port=7860,
-        show_error=True,
-        share=False
-    )
