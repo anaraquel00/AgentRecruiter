@@ -310,7 +310,7 @@ class CareerAgent:
                 FROM jobs 
                 WHERE LOWER(skills) LIKE ? 
                 ORDER BY salary DESC
-            """, (f"%{skill.lower()}%",))
+            """
 
             cursor.execute(query, search_terms)
             return [
