@@ -3,10 +3,7 @@ from career_agent import CareerAgent
 import logging
 
 # Configuração de logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 def create_interface():
     agent = CareerAgent()
@@ -64,5 +61,6 @@ if __name__ == "__main__":
     app.launch(
         server_name="0.0.0.0",
         server_port=7860,
+        enable_api=True,
         show_error=True
     )
