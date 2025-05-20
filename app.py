@@ -25,9 +25,12 @@ def create_interface():
     interface = gr.ChatInterface(
         fn=chat_fn,
         examples=[
-            ["Como criar um currículo para backend?"],
-            ["Quais as médias salariais para frontend?"],
-            ["Quais são os pré-requisitos para ser um desenvolvedor backend em java?"]
+            ["🎯 Serviços disponíveis:\n\n"
+            "1. 🔍 Análise de currículo\n"
+            "2. 💰 Pesquisa salarial\n"
+            "3. 📌 Vagas personalizadas\n"
+            "4. 🚀 Planos de carreira\n\n"
+            "Como posso ajudar você hoje?"],            
         ],
         title="🤖 Career Agent",
         description="Assistente de Carreira em Tecnologia",
