@@ -152,10 +152,9 @@ class CareerAgent:
         try:
             intent = self._classify_intent(message)
             
-            if intent == "CURRICULO":
+            if intent == "PREREQ":
                 stack = self._detect_tech_stack(message)
-                content = self._generate_resume_template(stack)
-                return {"role": "assistant", "content": content or "Modelo não disponível"}
+                return {"role": "assistant", "content": self._get_requirements(stack)}
 
             elif intent == "PREREQ":  
                 stack = self._detect_tech_stack(message)  
@@ -350,7 +349,7 @@ class CareerAgent:
             "CURRICULO": ["currículo", "cv", "modelo", "resume", "formatar"],
             "VAGAS": ["vaga", "emprego", "python", "oportunidade", "contratando", "java", "angular", "react"],
             "PLANO": ["plano", "carreira", "progressão", "trajetória", "objetivo"],
-            "PREREQ": ["pré-requisitos", "requisitos", "habilidades necessárias", "habilidades técnicas", "o que preciso saber"], 
+            "PREREQ": ["pré-requisitos", "requisitos", "habilidades necessárias", "habilidades técnicas", "como ser", "o que preciso saber"], 
             "SALARIO": ["salário", "remuneração", "ganho", "pagamento", "salariais", "média"]  
             
         }
