@@ -543,6 +543,8 @@ class CareerAgent:
         - Back: Node.js + MongoDB (API REST)  
         - DevOps: Docker + AWS ECS  
         - **Resultado:** 40% aumento na conversão
+
+        ---
         """
 
 if __name__ == "__main__":
