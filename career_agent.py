@@ -535,6 +535,14 @@ class CareerAgent:
         ### **CERTIFICAÇÕES**
         - Google Professional Cloud Architect
         - Scrum Master (PSM I)
+
+        ---
+        ### **PROJETOS FULLSTACK**  
+        **Plataforma de E-commerce**  
+        - Front: React + Material UI (SSR com Next.js)  
+        - Back: Node.js + MongoDB (API REST)  
+        - DevOps: Docker + AWS ECS  
+        - **Resultado:** 40% aumento na conversão
         """
 
 if __name__ == "__main__":
