@@ -347,15 +347,27 @@ class CareerAgent:
         
         # Dicionário de palavras-chave para fallback local
         keyword_map =  keyword_map = {
-            "VAGAS": ["vaga", "emprego", "python", "oportunidade", "contratando", "java", "angular", "react"],
             "CURRICULO": ["currículo", "cv", "modelo", "resume", "formatar"],
+            "VAGAS": ["vaga", "emprego", "python", "oportunidade", "contratando", "java", "angular", "react"],
+            "PLANO": ["plano", "carreira", "progressão", "trajetória", "objetivo"],
             "PREREQ": ["pré-requisitos", "requisitos", "habilidades necessárias", "habilidades técnicas", "o que preciso saber"], 
-            "SALARIO": ["salário", "remuneração", "ganho", "pagamento", "salariais", "média"],  
-            "PLANO": ["plano", "carreira", "progressão", "trajetória", "objetivo"]
+            "SALARIO": ["salário", "remuneração", "ganho", "pagamento", "salariais", "média"]  
+            
         }
         
         for intent, keywords in keyword_map.items():
-            if any(kw in cleaned_msg for kw in keywords):
+            if intent == "CURRICULO" and any(kw in cleaned_msg for kw in keywords):
+                return "CURRICULO"
+            elif intent == "VAGAS" and any(kw in cleaned_msg for kw in keywords):
+                return "VAGAS"
+            elif intent == "PLANO" and any(kw in cleaned_msg for kw in keywords):
+                return "PLANO"
+            elif intent == "PREREQ" and any(kw in cleaned_msg for kw in keywords):
+                return "PREREQ"
+            elif intent == "SALARIO" and any(kw in cleaned_msg for kw in keywords):
+                return "SALARIO"
+                
+                
                 logger.debug(f"Intenção detectada via keywords: {intent}")
                 return intent
             
