@@ -296,24 +296,32 @@ class CareerAgent:
         try:
             conn = self._get_conn()  
             cursor = conn.cursor()   
+
+            # Obter habilidades da stack (ex: ["Java", "Python"] para Backend)
+            skills = self.tech_stacks.get(stack, {}).get('skills', [])
+            if not skills:
+                return []
             
-            cursor.execute("""
+            # Criar termos de busca: "%java%", "%python%", etc.
+            search_terms = [f"%{skill.lower()}%" for skill in skills]
+            
+            query = f"""
                 SELECT title, company, skills, salary, link 
                 FROM jobs 
                 WHERE LOWER(skills) LIKE ? 
                 ORDER BY salary DESC
             """, (f"%{skill.lower()}%",))
-            
-            jobs = [
+
+            cursor.execute(query, search_terms)
+            return [
                 {"title": row[0], "company": row[1], "skills": row[2], 
                  "salary": row[3], "link": row[4]}
                 for row in cursor.fetchall()
             ]
-            return jobs
-            
-        except sqlite3.Error as e:
-            logger.error(f"Erro no banco de dados: {str(e)}")
-            return []                  
+                        
+        except Exception as e:
+            logger.error(f"Erro ao buscar vagas: {str(e)}")
+            return []                
         
     @lru_cache(maxsize=100)
     def _classify_intent(self, message: str) -> str:
@@ -393,7 +401,9 @@ class CareerAgent:
             jobs = [
                 (1, "Desenvolvedor Frontend", "Tech Solutions", "React/TypeScript", "R$ 8.000", "https://exemplo.com/vaga1"),
                 (2, "Engenheiro de Dados", "Data Corp", "Python/SQL", "R$ 12.000", "https://exemplo.com/vaga2"),
-                (3, "Cientista de Dados", "AI Tech", "Python/Pandas", "R$ 15.000", "https://exemplo.com/vaga3")
+                (3, "Cientista de Dados", "AI Tech", "Python/Pandas", "R$ 15.000", "https://exemplo.com/vaga3"),
+                (4, "Arquiteto Backend", "Cloud Systems", "Java/Micronaut/AWS", "R$ 18.000", "https://exemplo.com/arquiteto"),
+                (5, "Desenvolvedor Java Pleno", "Tech Innovations", "Java/Spring/Hibernate", "R$ 12.000", "https://exemplo.com/java")
             ]
             
             cursor.executemany(
