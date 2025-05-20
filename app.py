@@ -17,16 +17,28 @@ def create_interface():
             return response["content"]
         except Exception as e:
             logging.error(f"Erro na interface: {str(e)}")
-            return "Erro interno. Recarregue a página."
+            return "🔧 Sistema temporariamente indisponível"
 
-    # Custom CSS omitido para brevidade (mantenha igual ao anterior)
-    
+    # CSS Customizado (AGORA DEFINIDO!)
+    custom_css = """
+    .gradio-container {background: #f8f9fa!important}
+    .title {text-align: center; padding: 20px; background: linear-gradient(135deg, #6B46C1 0%, #4299E1 100%); color: white!important; border-radius: 10px}
+    .description {font-size: 1.1em!important; color: #4a5568!important}
+    footer {visibility: hidden!important}
+    """
+
     with gr.Blocks(title="Career Agent Pro", css=custom_css, theme="soft") as interface:
-        gr.Markdown("# 🤖 Career Agent Pro")
+        # Header
+        gr.Markdown("""
+        <div class="title">
+            <h1>🤖 Career Agent Pro</h1>
+            <p>Soluções Inteligentes para Sua Carreira Tech</p>
+        </div>
+        """)
         
-        # Componentes
-        chatbot = gr.Chatbot(height=500)
-        msg = gr.Textbox(label="Sua Mensagem", placeholder="Ex: 'Preciso de um modelo de currículo para backend'")
+        # Chat
+        chatbot = gr.Chatbot(height=450, label="Conversa")
+        msg = gr.Textbox(placeholder="Digite sua pergunta...", label="Mensagem")
         
         # Exemplos
         gr.Examples(
@@ -36,26 +48,20 @@ def create_interface():
                 ["Mostre vagas de Python em São Paulo"],
                 ["Plano de carreira para desenvolvedor fullstack"]
             ],
-            inputs=msg
-        )
-        
-        # Ações
-        msg.submit(
-            fn=chat_fn,
-            inputs=[msg, chatbot],
-            outputs=[chatbot],
-            api_name="predict"
+            inputs=msg,
+            label="Clique para carregar exemplos"
         )
         
         # Botões
         with gr.Row():
-            gr.Button("Limpar").click(lambda: None, None, chatbot)
+            gr.Button("🧹 Limpar").click(lambda: None, None, chatbot)
+            gr.Button("🚀 Enviar", variant="primary").click(chat_fn, [msg, chatbot], chatbot)
 
-    return interface  
+    return interface
 
 if __name__ == "__main__":
     app = create_interface()
-    app.launch(  
+    app.launch(
         server_name="0.0.0.0",
         server_port=7860,
         show_error=True
