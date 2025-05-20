@@ -16,11 +16,12 @@ def create_interface():
     def chat_fn(message: str, history: list):
         try:
             response = agent.safe_respond(message, history)
-            return history + [(message, response["content"])]
+            return response["content"]
         except Exception as e:
-            return history + [(message, "⚠️ Erro no processamento")]
+            logging.error(f"Erro na interface: {str(e)}")
+            return "Erro interno. Recarregue a página."
 
-    # CSS Customizado (AGORA DEFINIDO!)
+    # CSS Customizado 
     custom_css = """
     .gradio-container {background: #f8f9fa!important}
     .title {text-align: center; padding: 20px; background: linear-gradient(135deg, #6B46C1 0%, #4299E1 100%); color: white!important; border-radius: 10px}
@@ -29,40 +30,29 @@ def create_interface():
     """
 
     with gr.Blocks(title="Career Agent Pro", css=custom_css, theme="soft") as interface:
-        # Header
-        gr.Markdown("""
-        <div class="title">
-            <h1>🤖 Career Agent Pro</h1>
-            <p>Soluções Inteligentes para Sua Carreira Tech</p>
-        </div>
-        """)
-        
-        # Chat
-        chatbot = gr.Chatbot(
-            height=500,
-            label="Conversa",
-            type="messages"
-        )
+        # ===== Declare todos os componentes PRIMEIRO =====
+        chatbot = gr.Chatbot(height=500, label="Conversa") 
+        msg = gr.Textbox(label="Sua Mensagem", placeholder="Digite sua pergunta...")
                 
         # Exemplos
         gr.Examples(
             examples=[
-                ["Como criar um currículo para backend Java?"],
-                ["Qual a média salarial para cientista de dados?"],
-                ["Mostre vagas de Python em São Paulo"],
-                ["Plano de carreira para desenvolvedor fullstack"]
+                ["Como criar um currículo para Python?"],
+                ["Qual o salário de um DevOps?"],
+                ["Mostre vagas de Java"]
             ],
-            inputs=[msg],
-            label="Clique para carregar exemplos"
+            inputs=[msg],  # ✅ Agora msg já está definido
+            outputs=chatbot,
+            label="📌 Exemplos de Perguntas"
         )
 
-        msg.submit(fn=chat_fn, inputs=[msg, chatbot], outputs=chatbot)
+        msg.submit(
+            fn=chat_fn,
+            inputs=[msg, chatbot],
+            outputs=chatbot,
+            api_name="predict"
+        )
         
-        # Botões
-        with gr.Row():
-            gr.Button("🧹 Limpar").click(lambda: None, None, chatbot)
-            gr.Button("🚀 Enviar", variant="primary").click(chat_fn, [msg, chatbot], chatbot)
-
     return interface
 
 if __name__ == "__main__":
