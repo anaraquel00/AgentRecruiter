@@ -16,10 +16,9 @@ def create_interface():
     def chat_fn(message: str, history: list):
         try:
             response = agent.safe_respond(message, history)
-            return response["content"]
+            return history + [(message, response["content"])]
         except Exception as e:
-            logging.error(f"Erro na interface: {str(e)}")
-            return "🔧 Sistema temporariamente indisponível"
+            return history + [(message, "⚠️ Erro no processamento")]
 
     # CSS Customizado (AGORA DEFINIDO!)
     custom_css = """
@@ -39,9 +38,12 @@ def create_interface():
         """)
         
         # Chat
-        chatbot = gr.Chatbot(height=450, label="Conversa")
-        msg = gr.Textbox(placeholder="Digite sua pergunta...", label="Mensagem")
-        
+        chatbot = gr.Chatbot(
+            height=500,
+            label="Conversa",
+            type="messages"
+        )
+                
         # Exemplos
         gr.Examples(
             examples=[
@@ -66,6 +68,6 @@ if __name__ == "__main__":
     app.launch(
         server_name="0.0.0.0",
         server_port=7860,
-        enable_api=True,
-        show_error=True
+        show_error=True,
+        share=False
     )
