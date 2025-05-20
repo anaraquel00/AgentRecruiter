@@ -441,100 +441,100 @@ class CareerAgent:
         return {"role": "assistant", "content": self._query_llm(message)}
 
     def _generate_resume_template(self, stack: str) -> str:
-    templates = {
-        "Backend": self._backend_resume(),
-        "Frontend": self._frontend_resume(),
-        "Fullstack": self._fullstack_resume()
-    }
-    return templates.get(stack, "Modelo não disponível para esta stack.")
+        templates = {
+            "Backend": self._backend_resume(),
+            "Frontend": self._frontend_resume(),
+            "Fullstack": self._fullstack_resume()
+        }
+        return templates.get(stack, "Modelo não disponível para esta stack.")
 
     def _backend_resume(self) -> str:
         return """
-    📄 **CURRÍCULO BACKEND DEVELOPER** *(Java/Python/Cloud)*
-    
-    ---
-    ### **INFORMAÇÕES PESSOAIS**
-    - **Nome:** [Seu Nome]
-    - **Localização:** [Cidade/UF]
-    - **GitHub:** [github.com/seuuser]
-    - **LinkedIn:** [linkedin.com/in/seuuser]
-    
-    ---
-    ### **RESUMO**
-    Desenvolvedor Backend com [X] anos em APIs escaláveis e arquitetura de microsserviços. Domínio em:
-    
-    - **Linguagens:** Java, Python, Kotlin
-    - **Frameworks:** Spring Boot, FastAPI, Hibernate
-    - **Cloud:** AWS (Lambda, RDS), Docker/Kubernetes
-    - **Banco de Dados:** PostgreSQL, MongoDB
-    
-    ---
-    ### **EXPERIÊNCIA**
-    **Engenheiro de Software Sênior**  
-    *Empresa X | 2020-Presente*  
-    - Projeto Y: API REST para processamento de pagamentos (Java + Spring)  
-    - Migração de monolito para microsserviços (aumento de 40% na performance)
-    
-    ---
-    ### **FORMAÇÃO**
-    - Bacharelado em Ciência da Computação | UFABC | 2019
-    - Certificação AWS Developer Associate
-    """
+        📄 **CURRÍCULO BACKEND DEVELOPER** *(Java/Python/Cloud)*
+        
+        ---
+        ### **INFORMAÇÕES PESSOAIS**
+        - **Nome:** [Seu Nome]
+        - **Localização:** [Cidade/UF]
+        - **GitHub:** [github.com/seuuser]
+        - **LinkedIn:** [linkedin.com/in/seuuser]
+        
+        ---
+        ### **RESUMO**
+        Desenvolvedor Backend com [X] anos em APIs escaláveis e arquitetura de microsserviços. Domínio em:
+        
+        - **Linguagens:** Java, Python, Kotlin
+        - **Frameworks:** Spring Boot, FastAPI, Hibernate
+        - **Cloud:** AWS (Lambda, RDS), Docker/Kubernetes
+        - **Banco de Dados:** PostgreSQL, MongoDB
+        
+        ---
+        ### **EXPERIÊNCIA**
+        **Engenheiro de Software Sênior**  
+        *Empresa X | 2020-Presente*  
+        - Projeto Y: API REST para processamento de pagamentos (Java + Spring)  
+        - Migração de monolito para microsserviços (aumento de 40% na performance)
+        
+        ---
+        ### **FORMAÇÃO**
+        - Bacharelado em Ciência da Computação | UFABC | 2019
+        - Certificação AWS Developer Associate
+        """
 
     def _frontend_resume(self) -> str:
         return """
-    📄 **CURRÍCULO FRONTEND DEVELOPER** *(React/TypeScript/UI)*
-    
-    ---
-    ### **DESTAQUES**
-    - 5+ anos criando interfaces responsivas
-    - Especialista em acessibilidade (WCAG 2.1)
-    - Tech Lead em 3 projetos com 100k+ usuários
-    
-    ---
-    ### **HABILIDADES**
-    - **Core:** JavaScript (ES6+), TypeScript, HTML5/CSS3
-    - **Frameworks:** React, Next.js, Angular 16+
-    - **Ferramentas:** Figma, Storybook, Jest/Cypress
-    - **Design Systems:** Material UI, Tailwind CSS
-    
-    ---
-    ### **PROJETOS**
-    **Sistema de Design**  
-    *Startup ABC | 2022*  
-    - Componentização reutilizável (30% menos código)
-    - Integração com API GraphQL
-    
-    ---
-    ### **EDUCAÇÃO**
-    Bootcamp Frontend Avançado | Alura | 2021
-    """
-    
+        📄 **CURRÍCULO FRONTEND DEVELOPER** *(React/TypeScript/UI)*
+        
+        ---
+        ### **DESTAQUES**
+        - 5+ anos criando interfaces responsivas
+        - Especialista em acessibilidade (WCAG 2.1)
+        - Tech Lead em 3 projetos com 100k+ usuários
+        
+        ---
+        ### **HABILIDADES**
+        - **Core:** JavaScript (ES6+), TypeScript, HTML5/CSS3
+        - **Frameworks:** React, Next.js, Angular 16+
+        - **Ferramentas:** Figma, Storybook, Jest/Cypress
+        - **Design Systems:** Material UI, Tailwind CSS
+        
+        ---
+        ### **PROJETOS**
+        **Sistema de Design**  
+        *Startup ABC | 2022*  
+        - Componentização reutilizável (30% menos código)
+        - Integração com API GraphQL
+        
+        ---
+        ### **EDUCAÇÃO**
+        Bootcamp Frontend Avançado | Alura | 2021
+        """
+        
     def _fullstack_resume(self) -> str:
         return """
-    📄 **CURRÍCULO FULLSTACK DEVELOPER** *(MERN Stack)*
-    
-    ---
-    ### **PERFIL**
-    Desenvolvedor Fullstack com expertise em:
-    
-    - **Frontend:** React + Redux Toolkit
-    - **Backend:** Node.js (Express/NestJS)
-    - **Mobile:** React Native
-    - **DevOps:** CI/CD com GitHub Actions
-    
-    ---
-    ### **EXPERIÊNCIA**
-    **Tech Lead**  
-    *Empresa Z | 2021-Presente*  
-    - Liderança técnica de equipe de 8 devs
-    - App de delivery: 4.8★ na Play Store (1M+ downloads)
-    
-    ---
-    ### **CERTIFICAÇÕES**
-    - Google Professional Cloud Architect
-    - Scrum Master (PSM I)
-    """
+        📄 **CURRÍCULO FULLSTACK DEVELOPER** *(MERN Stack)*
+        
+        ---
+        ### **PERFIL**
+        Desenvolvedor Fullstack com expertise em:
+        
+        - **Frontend:** React + Redux Toolkit
+        - **Backend:** Node.js (Express/NestJS)
+        - **Mobile:** React Native
+        - **DevOps:** CI/CD com GitHub Actions
+        
+        ---
+        ### **EXPERIÊNCIA**
+        **Tech Lead**  
+        *Empresa Z | 2021-Presente*  
+        - Liderança técnica de equipe de 8 devs
+        - App de delivery: 4.8★ na Play Store (1M+ downloads)
+        
+        ---
+        ### **CERTIFICAÇÕES**
+        - Google Professional Cloud Architect
+        - Scrum Master (PSM I)
+        """
 
 if __name__ == "__main__":
     agent = CareerAgent()
