@@ -52,9 +52,11 @@ def create_interface():
                 ["Mostre vagas de Python em São Paulo"],
                 ["Plano de carreira para desenvolvedor fullstack"]
             ],
-            inputs=msg,
+            inputs=[msg],
             label="Clique para carregar exemplos"
         )
+
+        msg.submit(fn=chat_fn, inputs=[msg, chatbot], outputs=chatbot)
         
         # Botões
         with gr.Row():
