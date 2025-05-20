@@ -125,19 +125,19 @@ class CareerAgent:
     def _init_tech_stacks(self):  
         self.tech_stacks = {
             "Frontend": {
-                "skills": ["Angular", "React", "Node.js", " Vue.js", "TypeScript", "Next.js", "Jest"],
+                "skills": ["React", "Node.js", " Vue.js", "TypeScript", "Next.js", "Jest"],
                 "salary": "R$ 3.500 - R$ 14.000",
                 "dicas": ["Domine componentização", "Aprimore acessibilidade"]
             },
             "Backend": {
-                "skills": ["Python", "Java", "FastAPI", "API Rest", "APIs RESTfull", "Docker", "PostgreSQL"],
+                "skills": ["Python", "FastAPI", "API Rest", "APIs RESTfull", "Django", "Docker", "PostgreSQL"],
                 "salary": "R$ 3.000 - R$ 16.000",
-                "dicas": ["Estude arquitetura limpa", "Aprenda Kubernetes", "Aprenda fundamentos de Python", "Aprenda Java POO"]
+                "dicas": ["Estude arquitetura limpa", "Aprenda Kubernetes", "Aprenda fundamentos de Python"]
             },
             "Fullstack": {
-                "skills": ["Python", "Java", "Node.js", "Angular", "React", "Docker"],
-                "salary": "R$ 5.000 - R$ 16.000",
-                "dicas": ["Aprenda fundamentos de Python", "Aprenda Java POO", "Aprenda Serverless", "Monitore com New Relic"]
+                "skills": ["Java", "Node.js", "Angular", "Spring"],
+                "salary": "R$ 5.000 - R$ 18.000",
+                "dicas": ["Aprenda Java POO", "Aprenda Serverless", "Monitore com New Relic"]
             },
             "Data Science": {
                 "skills": ["Python", "MySQL", "PosteGreSQL", "MongoDB", "Pandas", "MLflow", "Spark"],
