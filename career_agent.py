@@ -350,7 +350,7 @@ class CareerAgent:
             Mensagem: "{message}"
     
             Opções (responda APENAS com a palavra-chave correspondente):
-            - VAGAS: Perguntas sobre vagas, oportunidades ou processos seletivos
+            - VAGAS: Perguntas sobre vagas, oportunidades ou processos seletivos)   
             - CURRICULO: Pedidos relacionados à criação ou revisão de currículos
             - SALARIO: Consultas sobre faixas salariais ou benefícios
             - PLANO: Orientação sobre planejamento de carreira
@@ -367,31 +367,7 @@ class CareerAgent:
         except Exception as e:
             logger.error(f"Erro na classificação: {str(e)}")
             return "OUTROS"  
-            
-            conn = self._get_conn()
-            cursor = conn.cursor() 
-                
-                query = """
-                    SELECT title, company, skills, salary, link 
-                    FROM jobs 
-                    WHERE LOWER(skills) LIKE ? 
-                    ORDER BY salary DESC
-                """
-                logger.debug(f"Executando query: {query}")  
-                logger.debug(f"Parâmetro: %{skill.lower()}%") 
-                
-                cursor.execute(query, (f"%{skill.lower()}%",))
-                
-            return [
-                    {"title": row[0], "company": row[1], "skills": row[2], 
-                     "salary": row[3], "link": row[4]}
-                    for row in cursor.fetchall()
-            ]    
-        
-            print(f"[DEBUG] Mensagem: '{message}'")
-            print(f"[DEBUG] Intenção detectada: {intent}")
-        
-            return intent        
+              
             
     def _local_fallback(self, message: str) -> str:
         """Respostas de fallback melhoradas"""
