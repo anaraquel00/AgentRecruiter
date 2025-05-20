@@ -1,9 +1,14 @@
+import sys
 import gradio as gr
 from career_agent import CareerAgent
 import logging
 
 # Configuração de logging
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logging.basicConfig(
+    stream=sys.stdout,  # Agora sys está definido
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 
 def create_interface():
     agent = CareerAgent()
