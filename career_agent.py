@@ -111,6 +111,7 @@ class CareerAgent:
         stack_keywords = {
             "Frontend": ["frontend", "front-end", "react", "javascript", "angular"],
             "Backend": ["backend", "back-end", "python", "java", "node", "api", "api rest", "api restfull", "servidor"],
+            "Fullstack": ["fullstack", "full-stack", "react+node", "mern", "mevn", "django", "next.js"],
             "Data Science": ["dados", "data", "analista", "machine learning", "bi"]
         }
         
@@ -125,19 +126,19 @@ class CareerAgent:
     def _init_tech_stacks(self):  
         self.tech_stacks = {
             "Frontend": {
-                "skills": ["React", "Node.js", " Vue.js", "TypeScript", "Next.js", "Jest"],
+                "skills": ["Angular", "React", "Node.js", " Vue.js", "TypeScript", "Next.js", "Jest"],
                 "salary": "R$ 3.500 - R$ 14.000",
                 "dicas": ["Domine componentização", "Aprimore acessibilidade"]
             },
             "Backend": {
-                "skills": ["Python", "FastAPI", "API Rest", "APIs RESTfull", "Django", "Docker", "PostgreSQL"],
+                "skills": ["Python", "Java", "FastAPI", "API Rest", "APIs RESTfull", "Django", "Spring", "Docker", "PostgreSQL"],
                 "salary": "R$ 3.000 - R$ 16.000",
                 "dicas": ["Estude arquitetura limpa", "Aprenda Kubernetes", "Aprenda fundamentos de Python"]
             },
             "Fullstack": {
-                "skills": ["Java", "Node.js", "Angular", "Spring"],
+                "skills": ["React", "Node.js", "TypeScript", "Docker", "AWS", "PostgreSQL"],
                 "salary": "R$ 5.000 - R$ 18.000",
-                "dicas": ["Aprenda Java POO", "Aprenda Serverless", "Monitore com New Relic"]
+                "dicas": ["Domine arquitetura híbrida", "Aprenda otimização full-cycle"]
             },
             "Data Science": {
                 "skills": ["Python", "MySQL", "PosteGreSQL", "MongoDB", "Pandas", "MLflow", "Spark"],
