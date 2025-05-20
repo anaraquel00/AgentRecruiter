@@ -292,7 +292,7 @@ class CareerAgent:
             "Como posso ajudar você hoje?"
         )
 
-    def _get_jobs(self, skill: str) -> List[Dict]:
+    def _get_jobs(self, stack: str) -> List[Dict]:
         try:
             conn = self._get_conn()  
             cursor = conn.cursor()   
@@ -300,15 +300,17 @@ class CareerAgent:
             # Obter habilidades da stack (ex: ["Java", "Python"] para Backend)
             skills = self.tech_stacks.get(stack, {}).get('skills', [])
             if not skills:
+                logger.warning(f"Nenhuma habilidade encontrada para a stack: {stack}")
                 return []
             
             # Criar termos de busca: "%java%", "%python%", etc.
             search_terms = [f"%{skill.lower()}%" for skill in skills]
-            
+
+            conditions = " OR ".join(["LOWER(skills) LIKE ?" for _ in skills])
             query = f"""
                 SELECT title, company, skills, salary, link 
                 FROM jobs 
-                WHERE LOWER(skills) LIKE ? 
+                WHERE {conditions}
                 ORDER BY salary DESC
             """
 
